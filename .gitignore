@@ -1,0 +1,88 @@
+# Compiled Object files
+*.o
+*.obj
+*.ko
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+*.la
+*.lo
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Build directories
+obj/
+bin/
+
+# Dependency files
+*.d
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Core dumps
+core
+core.*
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Eclipse CDT
+.cproject
+.project
+.settings/
+.metadata/
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# Model files (optional - uncomment if you don't want to track trained models)
+# *.txt
+# xor_model.txt
+
+# Dataset files (large binary files)
+*.idx3-ubyte
+*.idx1-ubyte
+*.zip
+mnist-dataset/
+
+# RapidCheck generated files
+.rapidcheck/
+
+# CMake (if you add CMake support later)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile.cmake
+*.cmake
+
+# Backup files
+*~
+*.orig
