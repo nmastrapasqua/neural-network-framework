@@ -44,6 +44,7 @@ public:
     const Vector& getLastInput() const;
     const Vector& getLastOutput() const;
     const Vector& getLastActivation() const;
+    const Vector& getLastWeightedSum() const;  // z = W*input + b (before activation)
 
     // Accessors for parameters
     const Matrix& getWeights() const;
@@ -83,6 +84,7 @@ public:
     size_t inputSize() const;
     size_t outputSize() const;
     std::string activationName() const;
+    std::shared_ptr<ActivationFunction> getActivation() const;
 
 private:
     Matrix weights_;  // output_size x input_size
@@ -96,4 +98,3 @@ private:
 };
 
 #endif // LAYER_H
-

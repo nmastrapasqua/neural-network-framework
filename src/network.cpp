@@ -1,5 +1,7 @@
 #include "network.h"
+#include "loss.h"
 #include <stdexcept>
+#include <algorithm>
 
 /**
  * Construct an empty network.
@@ -175,4 +177,128 @@ const Layer& Network::getLayer(size_t index) const {
         );
     }
     return layers_[index];
+}
+
+/**
+ * Perform backpropagation to compute gradients for all weights and biases.
+ *
+ * Implements the backpropagation algorithm according to Requirements 6.1-6.6:
+ *
+ * Algorithm:
+ * 1. Compute output layer delta: δ^L = ∇_a L ⊙ σ'(z^L)
+ *    where ∇_a L is the loss gradient and σ' is the activation derivative
+ *
+ * 2. For each hidden layer (backward from L-1 to 0):
+ *    δ^l = (W^(l+1))^T * δ^(l+1) ⊙ σ'(z^l)
+ *
+ * 3. Compute weight gradients: ∂L/∂W^l = δ^l * (a^(l-1))^T
+ *    where a^(l-1) is the input to layer l (output of layer l-1)
+ *
+ * 4. Compute bias gradients: ∂L/∂b^l = δ^l
+ *
+ * @param target Target output vector
+ * @param loss_function Loss function to compute initial gradient
+ * @param weight_gradients Output vector to store weight gradients (one matrix per layer)
+ * @param bias_gradients Output vector to store bias gradients (one vector per layer)
+ */
+void Network::backpropagate(const Vector& target,
+                            LossFunction& loss_function,
+                            std::vector<Matrix>& weight_gradients,
+                            std::vector<Vector>& bias_gradients) {
+    // Validate network has layers
+    if (layers_.empty()) {
+        throw std::invalid_argument(
+            "Network backpropagate: cannot backpropagate with empty network"
+        );
+    }
+
+    size_t num_layers = layers_.size();
+
+    // Initialize gradient storage
+    weight_gradients.clear();
+    bias_gradients.clear();
+
+    // Storage for deltas (one per layer) - we'll build this backward
+    std::vector<Vector> deltas;
+    deltas.reserve(num_layers);
+
+    // Step 1: Compute output layer delta
+    // δ^L = ∇_a L ⊙ σ'(z^L)
+    // Requirement 6.1, 6.5: Use loss gradient and activation derivative
+    const Layer& output_layer = layers_[num_layers - 1];
+    const Vector& output = output_layer.getLastOutput();
+    const Vector& z_output = output_layer.getLastWeightedSum();  // weighted sum before activation
+
+    // Get loss gradient: ∂L/∂a^L
+    Vector loss_grad = loss_function.gradient(output, target);
+
+    // Apply activation derivative element-wise: δ^L = ∇_a L ⊙ σ'(z^L)
+    // Requirement 6.5: Apply activation function derivative
+    Vector output_delta(output.size());
+    std::shared_ptr<ActivationFunction> output_activation = output_layer.getActivation();
+    for (size_t i = 0; i < output.size(); ++i) {
+        double activation_deriv = output_activation->derivative(z_output[i]);
+        output_delta[i] = loss_grad[i] * activation_deriv;
+    }
+
+    // Store output delta at the end (we'll build deltas in reverse order)
+    deltas.push_back(output_delta);
+
+    // Step 2: Propagate deltas backward through hidden layers
+    // δ^l = (W^(l+1))^T * δ^(l+1) ⊙ σ'(z^l)
+    // Requirement 6.3: Propagate gradients backward using chain rule
+    for (int l = num_layers - 2; l >= 0; --l) {
+        const Layer& current_layer = layers_[l];
+        const Layer& next_layer = layers_[l + 1];
+        const Vector& z_current = current_layer.getLastWeightedSum();
+
+        // Get the delta from the next layer (which is at index 0 in our reverse-built vector)
+        const Vector& next_delta = deltas[num_layers - 2 - l];
+
+        // Compute (W^(l+1))^T * δ^(l+1)
+        Matrix weights_next_transposed = next_layer.getWeights().transpose();
+        Vector backprop_error = weights_next_transposed * next_delta;
+
+        // Apply activation derivative element-wise: ⊙ σ'(z^l)
+        // Requirement 6.5: Apply activation function derivative
+        Vector current_delta(current_layer.outputSize());
+        std::shared_ptr<ActivationFunction> current_activation = current_layer.getActivation();
+        for (size_t i = 0; i < current_layer.outputSize(); ++i) {
+            double activation_deriv = current_activation->derivative(z_current[i]);
+            current_delta[i] = backprop_error[i] * activation_deriv;
+        }
+
+        deltas.push_back(current_delta);
+    }
+
+    // Now reverse deltas so they're in forward order (layer 0 to layer L)
+    std::reverse(deltas.begin(), deltas.end());
+
+    // Step 3 & 4: Compute weight and bias gradients for all layers
+    // Requirement 6.1, 6.2: Compute gradients for all weights and biases
+    for (size_t l = 0; l < num_layers; ++l) {
+        const Layer& layer = layers_[l];
+        const Vector& layer_input = layer.getLastInput();
+
+        // Requirement 6.4: Use intermediate outputs from forward pass
+
+        // Compute weight gradients: ∂L/∂W^l = δ^l * (a^(l-1))^T
+        // This is an outer product: each element (i,j) = δ^l[i] * a^(l-1)[j]
+        size_t output_size = layer.outputSize();
+        size_t input_size = layer.inputSize();
+        Matrix weight_grad(output_size, input_size);
+
+        for (size_t i = 0; i < output_size; ++i) {
+            for (size_t j = 0; j < input_size; ++j) {
+                weight_grad(i, j) = deltas[l][i] * layer_input[j];
+            }
+        }
+
+        weight_gradients.push_back(weight_grad);
+
+        // Compute bias gradients: ∂L/∂b^l = δ^l
+        bias_gradients.push_back(deltas[l]);
+    }
+
+    // Requirement 6.6: All gradients are now stored in weight_gradients and bias_gradients
 }

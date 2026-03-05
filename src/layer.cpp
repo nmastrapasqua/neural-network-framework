@@ -93,6 +93,14 @@ const Vector& Layer::getLastActivation() const {
 }
 
 /**
+ * Get the last weighted sum (before activation).
+ * This is z = W*input + b, used in backpropagation for computing derivatives.
+ */
+const Vector& Layer::getLastWeightedSum() const {
+    return last_weighted_sum_;
+}
+
+/**
  * Get const reference to weights matrix.
  */
 const Matrix& Layer::getWeights() const {
@@ -141,6 +149,14 @@ size_t Layer::outputSize() const {
  */
 std::string Layer::activationName() const {
     return activation_->name();
+}
+
+/**
+ * Get the activation function used by this layer.
+ * Returns a shared pointer to the activation function.
+ */
+std::shared_ptr<ActivationFunction> Layer::getActivation() const {
+    return activation_;
 }
 
 /**

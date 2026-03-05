@@ -8,6 +8,9 @@
 #include "vector.h"
 #include "activation.h"
 
+// Forward declaration
+class LossFunction;
+
 /**
  * Network class represents a feedforward neural network.
  *
@@ -110,6 +113,35 @@ public:
 
 private:
     std::vector<Layer> layers_;
+
+    /**
+     * Perform backpropagation to compute gradients for all weights and biases.
+     *
+     * Implements the backpropagation algorithm:
+     * 1. Compute output layer delta: δ^L = loss.gradient() ⊙ activation.derivative(z^L)
+     * 2. Propagate delta backward: δ^l = (W^(l+1))^T * δ^(l+1) ⊙ activation.derivative(z^l)
+     * 3. Compute weight gradients: ∂L/∂W^l = δ^l * (a^(l-1))^T
+     * 4. Compute bias gradients: ∂L/∂b^l = δ^l
+     *
+     * Uses cached values from forward pass (last_input_, last_weighted_sum_, last_output_)
+     *
+     * Requirements validated:
+     * - 6.1: Calculate gradient of loss function w.r.t. all weights
+     * - 6.2: Calculate gradient of loss function w.r.t. all biases
+     * - 6.3: Propagate gradients backward through all layers using chain rule
+     * - 6.4: Use intermediate outputs memorized during forward pass
+     * - 6.5: Apply activation function derivative during backpropagation
+     * - 6.6: Store all computed gradients for parameter update
+     *
+     * @param target Target output vector
+     * @param loss_function Loss function to compute initial gradient
+     * @param weight_gradients Output vector to store weight gradients (one matrix per layer)
+     * @param bias_gradients Output vector to store bias gradients (one vector per layer)
+     */
+    void backpropagate(const Vector& target,
+                       LossFunction& loss_function,
+                       std::vector<Matrix>& weight_gradients,
+                       std::vector<Vector>& bias_gradients);
 };
 
 #endif // NETWORK_H
