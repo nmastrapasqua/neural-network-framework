@@ -142,3 +142,37 @@ std::vector<size_t> Network::getTopology() const {
 
     return topology;
 }
+
+/**
+ * Get a reference to a specific layer for weight initialization or inspection.
+ *
+ * @param index Layer index (0-based)
+ * @return Reference to the layer
+ * @throws std::out_of_range if index is invalid
+ */
+Layer& Network::getLayer(size_t index) {
+    if (index >= layers_.size()) {
+        throw std::out_of_range(
+            "Network getLayer: index " + std::to_string(index) +
+            " is out of range (network has " + std::to_string(layers_.size()) + " layers)"
+        );
+    }
+    return layers_[index];
+}
+
+/**
+ * Get a const reference to a specific layer for inspection.
+ *
+ * @param index Layer index (0-based)
+ * @return Const reference to the layer
+ * @throws std::out_of_range if index is invalid
+ */
+const Layer& Network::getLayer(size_t index) const {
+    if (index >= layers_.size()) {
+        throw std::out_of_range(
+            "Network getLayer: index " + std::to_string(index) +
+            " is out of range (network has " + std::to_string(layers_.size()) + " layers)"
+        );
+    }
+    return layers_[index];
+}

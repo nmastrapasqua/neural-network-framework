@@ -90,6 +90,24 @@ public:
      */
     std::vector<size_t> getTopology() const;
 
+    /**
+     * Get a reference to a specific layer for weight initialization or inspection.
+     *
+     * @param index Layer index (0-based)
+     * @return Reference to the layer
+     * @throws std::out_of_range if index is invalid
+     */
+    Layer& getLayer(size_t index);
+
+    /**
+     * Get a const reference to a specific layer for inspection.
+     *
+     * @param index Layer index (0-based)
+     * @return Const reference to the layer
+     * @throws std::out_of_range if index is invalid
+     */
+    const Layer& getLayer(size_t index) const;
+
 private:
     std::vector<Layer> layers_;
 };

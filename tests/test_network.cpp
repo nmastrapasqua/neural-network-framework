@@ -465,6 +465,173 @@ void testDifferentActivationsPerLayer() {
     std::cout << "  ✓ Different activations per layer passed" << std::endl;
 }
 
+/**
+ * Test: Network with Xavier weight initialization
+ * Validates: Requirements 3.2, 4.1
+ *
+ * Tests that a network can use Xavier initialization and produce varied outputs.
+ */
+void testNetworkWithXavierInitialization() {
+    std::cout << "Testing network with Xavier initialization..." << std::endl;
+
+    Network network;
+    auto sigmoid = std::make_shared<Sigmoid>();
+
+    // Build network: 2 -> 4 -> 1
+    network.addLayer(2, 4, sigmoid);
+    network.addLayer(4, 1, sigmoid);
+
+    // Initialize weights using Xavier for each layer
+    network.getLayer(0).initializeXavier(2, 4);
+    network.getLayer(1).initializeXavier(4, 1);
+
+    // Verify weights are in Xavier range for layer 0
+    // Range: [-sqrt(6/(fan_in+fan_out)), sqrt(6/(fan_in+fan_out))]
+    double limit0 = std::sqrt(6.0 / (2 + 4));  // sqrt(6/6) = 1.0
+    const Matrix& weights0 = network.getLayer(0).getWeights();
+    for (size_t i = 0; i < weights0.rows(); ++i) {
+        for (size_t j = 0; j < weights0.cols(); ++j) {
+            assert(weights0(i, j) >= -limit0 && weights0(i, j) <= limit0);
+        }
+    }
+
+    // Verify weights are in Xavier range for layer 1
+    double limit1 = std::sqrt(6.0 / (4 + 1));  // sqrt(6/5) ≈ 1.095
+    const Matrix& weights1 = network.getLayer(1).getWeights();
+    for (size_t i = 0; i < weights1.rows(); ++i) {
+        for (size_t j = 0; j < weights1.cols(); ++j) {
+            assert(weights1(i, j) >= -limit1 && weights1(i, j) <= limit1);
+        }
+    }
+
+    // Test forward pass with initialized weights through the network
+    Vector input{0.5, -0.3};
+    Vector output = network.predict(input);
+    assert(output.size() == 1);
+
+    // With Xavier initialization, output should not be exactly 0.5 (which would be the case with zero weights)
+    assert(!approxEqual(output[0], 0.5, 0.01));
+
+    // Test multiple predictions with different inputs
+    Vector input2{1.0, 1.0};
+    Vector output2 = network.predict(input2);
+    assert(output2.size() == 1);
+
+    Vector input3{-1.0, -1.0};
+    Vector output3 = network.predict(input3);
+    assert(output3.size() == 1);
+
+    // Outputs should vary for different inputs
+    bool has_variation = !approxEqual(output[0], output2[0], 0.01) ||
+                         !approxEqual(output2[0], output3[0], 0.01);
+    assert(has_variation);
+
+    std::cout << "  ✓ Network with Xavier initialization passed" << std::endl;
+}
+
+/**
+ * Test: Network with manual weight initialization
+ * Validates: Requirements 3.1, 4.1
+ *
+ * Tests that weights and biases can be set manually to arbitrary values.
+ */
+void testNetworkWithManualWeightInitialization() {
+    std::cout << "Testing network with manual weight initialization..." << std::endl;
+
+    Network network;
+    auto sigmoid = std::make_shared<Sigmoid>();
+
+    // Build simple network: 2 -> 1
+    network.addLayer(2, 1, sigmoid);
+
+    // Manually set specific weight values
+    Matrix& weights = network.getLayer(0).getWeights();
+    weights(0, 0) = 0.5;   // weight from input 0 to output 0
+    weights(0, 1) = -0.3;  // weight from input 1 to output 0
+
+    // Manually set bias
+    Vector& biases = network.getLayer(0).getBiases();
+    biases[0] = 0.1;
+
+    // Verify weights were set correctly
+    assert(approxEqual(weights(0, 0), 0.5));
+    assert(approxEqual(weights(0, 1), -0.3));
+    assert(approxEqual(biases[0], 0.1));
+
+    // Test forward pass with known weights
+    // z = 0.5*1.0 + (-0.3)*2.0 + 0.1 = 0.5 - 0.6 + 0.1 = 0.0
+    // output = sigmoid(0.0) = 0.5
+    Vector input{1.0, 2.0};
+    Vector output = network.predict(input);
+
+    assert(output.size() == 1);
+    assert(approxEqual(output[0], 0.5, 1e-6));
+
+    // Test with different input
+    // z = 0.5*2.0 + (-0.3)*1.0 + 0.1 = 1.0 - 0.3 + 0.1 = 0.8
+    // output = sigmoid(0.8) ≈ 0.689
+    Vector input2{2.0, 1.0};
+    Vector output2 = network.predict(input2);
+
+    double expected = 1.0 / (1.0 + std::exp(-0.8));  // sigmoid(0.8)
+    assert(approxEqual(output2[0], expected, 1e-6));
+
+    std::cout << "  ✓ Network with manual weight initialization passed" << std::endl;
+}
+
+/**
+ * Test: Network with mixed initialization strategies
+ * Validates: Requirements 3.1, 3.2, 3.3
+ *
+ * Tests that different layers can use different initialization strategies.
+ */
+void testNetworkWithMixedInitialization() {
+    std::cout << "Testing network with mixed initialization strategies..." << std::endl;
+
+    Network network;
+    auto sigmoid = std::make_shared<Sigmoid>();
+    auto relu = std::make_shared<ReLU>();
+
+    // Build network: 3 -> 4 -> 2
+    network.addLayer(3, 4, relu);
+    network.addLayer(4, 2, sigmoid);
+
+    // Layer 0: Use He initialization (good for ReLU)
+    network.getLayer(0).initializeHe(3);
+
+    // Layer 1: Use Xavier initialization (good for sigmoid)
+    network.getLayer(1).initializeXavier(4, 2);
+
+    // Verify He initialization range for layer 0: [-sqrt(2/fan_in), sqrt(2/fan_in)]
+    double he_limit = std::sqrt(2.0 / 3);
+    const Matrix& weights0 = network.getLayer(0).getWeights();
+    for (size_t i = 0; i < weights0.rows(); ++i) {
+        for (size_t j = 0; j < weights0.cols(); ++j) {
+            assert(weights0(i, j) >= -he_limit && weights0(i, j) <= he_limit);
+        }
+    }
+
+    // Verify Xavier initialization range for layer 1: [-sqrt(6/(fan_in+fan_out)), sqrt(6/(fan_in+fan_out))]
+    double xavier_limit = std::sqrt(6.0 / (4 + 2));
+    const Matrix& weights1 = network.getLayer(1).getWeights();
+    for (size_t i = 0; i < weights1.rows(); ++i) {
+        for (size_t j = 0; j < weights1.cols(); ++j) {
+            assert(weights1(i, j) >= -xavier_limit && weights1(i, j) <= xavier_limit);
+        }
+    }
+
+    // Test forward pass
+    Vector input{0.5, -0.5, 1.0};
+    Vector output = network.predict(input);
+    assert(output.size() == 2);
+
+    // Outputs should be in sigmoid range (0, 1) since last layer uses sigmoid
+    assert(output[0] > 0.0 && output[0] < 1.0);
+    assert(output[1] > 0.0 && output[1] < 1.0);
+
+    std::cout << "  ✓ Network with mixed initialization strategies passed" << std::endl;
+}
+
 int main() {
     std::cout << "Running Network tests..." << std::endl;
     std::cout << "=======================" << std::endl;
@@ -483,6 +650,9 @@ int main() {
     testComplexNetworkArchitecture();
     testMultiplePredictions();
     testDifferentActivationsPerLayer();
+    testNetworkWithXavierInitialization();
+    testNetworkWithManualWeightInitialization();
+    testNetworkWithMixedInitialization();
 
     std::cout << std::endl;
     std::cout << "All Network tests passed! ✓" << std::endl;
