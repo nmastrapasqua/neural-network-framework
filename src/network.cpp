@@ -302,3 +302,92 @@ void Network::backpropagate(const Vector& target,
 
     // Requirement 6.6: All gradients are now stored in weight_gradients and bias_gradients
 }
+
+/**
+ * Update network parameters using computed gradients.
+ *
+ * Implements gradient descent parameter update according to Requirements 7.1-7.5:
+ *
+ * Algorithm:
+ * For each layer l:
+ *   For each weight W^l[i][j]:
+ *     W^l[i][j] := W^l[i][j] - η * ∂L/∂W^l[i][j]
+ *   For each bias b^l[i]:
+ *     b^l[i] := b^l[i] - η * ∂L/∂b^l[i]
+ *
+ * where η is the learning rate.
+ *
+ * Requirements validated:
+ * - 7.1: Update all weights using gradient descent
+ * - 7.2: Update all biases using gradient descent
+ * - 7.3: Apply learning rate to parameter updates
+ * - 7.5: Execute update according to formula: param_new = param_old - learning_rate * gradient
+ *
+ * @param weight_gradients Gradients for weights (one matrix per layer)
+ * @param bias_gradients Gradients for biases (one vector per layer)
+ * @param learning_rate Learning rate (η) to scale gradient updates
+ */
+void Network::updateParameters(const std::vector<Matrix>& weight_gradients,
+                               const std::vector<Vector>& bias_gradients,
+                               double learning_rate) {
+    // Validate gradient dimensions match network structure
+    if (weight_gradients.size() != layers_.size()) {
+        throw std::invalid_argument(
+            "Network updateParameters: weight_gradients size " +
+            std::to_string(weight_gradients.size()) +
+            " does not match number of layers " + std::to_string(layers_.size())
+        );
+    }
+
+    if (bias_gradients.size() != layers_.size()) {
+        throw std::invalid_argument(
+            "Network updateParameters: bias_gradients size " +
+            std::to_string(bias_gradients.size()) +
+            " does not match number of layers " + std::to_string(layers_.size())
+        );
+    }
+
+    // Requirement 7.1, 7.2, 7.3, 7.5: Update all weights and biases using gradient descent
+    // Apply formula: θ_new = θ_old - η * gradient
+    for (size_t l = 0; l < layers_.size(); ++l) {
+        Layer& layer = layers_[l];
+        Matrix& weights = layer.getWeights();
+        Vector& biases = layer.getBiases();
+
+        const Matrix& weight_grad = weight_gradients[l];
+        const Vector& bias_grad = bias_gradients[l];
+
+        // Validate gradient dimensions match layer dimensions
+        if (weight_grad.rows() != weights.rows() || weight_grad.cols() != weights.cols()) {
+            throw std::invalid_argument(
+                "Network updateParameters: weight gradient dimensions (" +
+                std::to_string(weight_grad.rows()) + "x" + std::to_string(weight_grad.cols()) +
+                ") do not match layer " + std::to_string(l) + " weight dimensions (" +
+                std::to_string(weights.rows()) + "x" + std::to_string(weights.cols()) + ")"
+            );
+        }
+
+        if (bias_grad.size() != biases.size()) {
+            throw std::invalid_argument(
+                "Network updateParameters: bias gradient size " +
+                std::to_string(bias_grad.size()) +
+                " does not match layer " + std::to_string(l) + " bias size " +
+                std::to_string(biases.size())
+            );
+        }
+
+        // Update weights: W^l[i][j] := W^l[i][j] - η * ∂L/∂W^l[i][j]
+        // Requirement 7.1, 7.3, 7.5
+        for (size_t i = 0; i < weights.rows(); ++i) {
+            for (size_t j = 0; j < weights.cols(); ++j) {
+                weights(i, j) = weights(i, j) - learning_rate * weight_grad(i, j);
+            }
+        }
+
+        // Update biases: b^l[i] := b^l[i] - η * ∂L/∂b^l[i]
+        // Requirement 7.2, 7.3, 7.5
+        for (size_t i = 0; i < biases.size(); ++i) {
+            biases[i] = biases[i] - learning_rate * bias_grad[i];
+        }
+    }
+}

@@ -142,6 +142,28 @@ private:
                        LossFunction& loss_function,
                        std::vector<Matrix>& weight_gradients,
                        std::vector<Vector>& bias_gradients);
+
+    /**
+     * Update network parameters using computed gradients.
+     *
+     * Applies gradient descent update rule:
+     * θ_new = θ_old - η * gradient
+     *
+     * where θ represents weights or biases, η is the learning rate.
+     *
+     * Requirements validated:
+     * - 7.1: Update all weights using gradient descent
+     * - 7.2: Update all biases using gradient descent
+     * - 7.3: Apply learning rate to parameter updates
+     * - 7.5: Execute update according to formula: param_new = param_old - learning_rate * gradient
+     *
+     * @param weight_gradients Gradients for weights (one matrix per layer)
+     * @param bias_gradients Gradients for biases (one vector per layer)
+     * @param learning_rate Learning rate (η) to scale gradient updates
+     */
+    void updateParameters(const std::vector<Matrix>& weight_gradients,
+                          const std::vector<Vector>& bias_gradients,
+                          double learning_rate);
 };
 
 #endif // NETWORK_H
