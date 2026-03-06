@@ -113,6 +113,7 @@ public:
      *     Average accumulated gradients over batch size
      *     Update parameters using averaged gradients
      *   Compute and record average loss for epoch
+     *   If monitor provided: record epoch metrics and print progress
      *
      * Requirements validated:
      * - 8.1: Accept training dataset with input-target pairs
@@ -122,6 +123,8 @@ public:
      * - 8.5: Accumulate and average gradients when batch_size > 1
      * - 8.6: Execute batch gradient descent when batch_size = dataset_size
      * - 8.7: Calculate and store average loss per epoch
+     * - 8.8: Provide method to monitor training progress (via TrainingMonitor)
+     * - 8.9: Notify progress when epoch completes (via TrainingMonitor)
      * - 8.10: Validate batch_size is > 0 and <= dataset size
      *
      * @param inputs Vector of input vectors (training examples)
@@ -130,6 +133,7 @@ public:
      * @param learning_rate Learning rate (η) for gradient descent
      * @param loss_function Loss function to measure prediction error
      * @param batch_size Number of examples per batch (default = 1 for SGD)
+     * @param monitor Optional TrainingMonitor to track and display progress (default = nullptr)
      * @return Vector of average loss values (one per epoch)
      * @throws std::invalid_argument if validation fails
      */
@@ -138,7 +142,8 @@ public:
                               size_t epochs,
                               double learning_rate,
                               LossFunction& loss_function,
-                              size_t batch_size = 1);
+                              size_t batch_size = 1,
+                              class TrainingMonitor* monitor = nullptr);
 
     /**
      * Get a reference to a specific layer for weight initialization or inspection.

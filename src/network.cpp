@@ -1,5 +1,6 @@
 #include "network.h"
 #include "loss.h"
+#include "training_monitor.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -331,6 +332,7 @@ void Network::backpropagate(const Vector& target,
  *     Average accumulated gradients: gradient_avg = gradient_sum / batch_size
  *     Update parameters: θ := θ - η * gradient_avg
  *   Compute average loss for epoch: epoch_loss / num_examples
+ *   If monitor provided: record epoch metrics and print progress
  *
  * @param inputs Vector of input vectors (training examples)
  * @param targets Vector of target output vectors (labels)
@@ -338,6 +340,7 @@ void Network::backpropagate(const Vector& target,
  * @param learning_rate Learning rate (η) for gradient descent
  * @param loss_function Loss function to measure prediction error
  * @param batch_size Number of examples per batch (default = 1 for SGD)
+ * @param monitor Optional TrainingMonitor to track and display progress (default = nullptr)
  * @return Vector of average loss values (one per epoch)
  * @throws std::invalid_argument if validation fails
  */
@@ -346,7 +349,8 @@ std::vector<double> Network::train(const std::vector<Vector>& inputs,
                                    size_t epochs,
                                    double learning_rate,
                                    LossFunction& loss_function,
-                                   size_t batch_size) {
+                                   size_t batch_size,
+                                   TrainingMonitor* monitor) {
     // Requirement 8.1: Validate training dataset
     if (inputs.empty()) {
         throw std::invalid_argument(
@@ -488,6 +492,45 @@ std::vector<double> Network::train(const std::vector<Vector>& inputs,
         // Requirement 8.7: Calculate and store average loss per epoch
         double avg_epoch_loss = epoch_loss / dataset_size;
         loss_history.push_back(avg_epoch_loss);
+
+        // Requirement 8.8, 8.9: If monitor provided, record metrics and print progress
+        if (monitor) {
+            // Calculate accuracy for this epoch
+            size_t correct_predictions = 0;
+            for (size_t i = 0; i < dataset_size; ++i) {
+                Vector output = predict(inputs[i]);
+
+                // For classification: find index of max value in output and target
+                // If they match, prediction is correct
+                size_t predicted_class = 0;
+                size_t target_class = 0;
+                double max_output = output[0];
+                double max_target = targets[i][0];
+
+                for (size_t j = 1; j < output.size(); ++j) {
+                    if (output[j] > max_output) {
+                        max_output = output[j];
+                        predicted_class = j;
+                    }
+                    if (targets[i][j] > max_target) {
+                        max_target = targets[i][j];
+                        target_class = j;
+                    }
+                }
+
+                if (predicted_class == target_class) {
+                    correct_predictions++;
+                }
+            }
+
+            double accuracy = static_cast<double>(correct_predictions) / dataset_size;
+
+            // Record epoch metrics
+            monitor->recordEpoch(epoch, avg_epoch_loss, accuracy);
+
+            // Print progress to user
+            monitor->printProgress(epoch, epochs);
+        }
     }
 
     return loss_history;
