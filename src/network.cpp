@@ -1,9 +1,11 @@
 #include "network.h"
 #include "loss.h"
 #include "training_monitor.h"
+#include "serializer.h"
 #include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 
 /**
  * Construct an empty network.
@@ -824,4 +826,129 @@ double Network::calculateAccuracy(const std::vector<Vector>& test_inputs,
     // Requirement 11.1, 11.3: Calculate and return accuracy as fraction of correct predictions
     double accuracy = static_cast<double>(correct_predictions) / num_examples;
     return accuracy;
+}
+
+/**
+ * Save the network to a file.
+ *
+ * Opens an output file stream and calls Serializer::serialize() to write
+ * the network structure, weights, and biases to the file in text format.
+ *
+ * Requirements validated:
+ * - 10.1: Serialize network to text format
+ * - 10.4: Enable saving trained networks for later use
+ *
+ * @param filename Path to the file where the network will be saved
+ * @throws std::runtime_error if file cannot be opened or writing fails
+ */
+void Network::save(const std::string& filename) const {
+    // Open output file stream
+    std::ofstream file(filename);
+
+    // Check if file was opened successfully
+    if (!file.is_open()) {
+        throw std::runtime_error(
+            "Network save: failed to open file '" + filename + "' for writing"
+        );
+    }
+
+    // Check if file is in good state
+    if (!file.good()) {
+        throw std::runtime_error(
+            "Network save: file '" + filename + "' is not in good state"
+        );
+    }
+
+    try {
+        // Call Serializer to write the network to the stream
+        Serializer::serialize(*this, file);
+
+        // Check if writing was successful
+        if (!file.good()) {
+            throw std::runtime_error(
+                "Network save: error occurred while writing to file '" + filename + "'"
+            );
+        }
+    } catch (const std::exception& e) {
+        // Close file and re-throw with context
+        file.close();
+        throw std::runtime_error(
+            "Network save: failed to serialize network to file '" + filename + "': " + e.what()
+        );
+    }
+
+    // Close the file
+    file.close();
+
+    // Verify file was closed successfully
+    if (file.is_open()) {
+        throw std::runtime_error(
+            "Network save: failed to close file '" + filename + "'"
+        );
+    }
+}
+
+/**
+ * Load a network from a file.
+ *
+ * Opens an input file stream and calls Serializer::deserialize() to read
+ * the network structure, weights, and biases from the file.
+ *
+ * This method replaces the current network with the loaded network.
+ *
+ * Requirements validated:
+ * - 10.4: Reconstruct network with same architecture and parameters
+ *
+ * @param filename Path to the file from which to load the network
+ * @throws std::runtime_error if file cannot be opened or reading fails
+ * @throws std::invalid_argument if file format is invalid or corrupted
+ */
+void Network::load(const std::string& filename) {
+    // Open input file stream
+    std::ifstream file(filename);
+
+    // Check if file was opened successfully
+    if (!file.is_open()) {
+        throw std::runtime_error(
+            "Network load: failed to open file '" + filename + "' for reading"
+        );
+    }
+
+    // Check if file is in good state
+    if (!file.good()) {
+        throw std::runtime_error(
+            "Network load: file '" + filename + "' is not in good state"
+        );
+    }
+
+    try {
+        // Call Serializer to read the network from the stream
+        Network loaded_network = Serializer::deserialize(file);
+
+        // Check if reading was successful
+        if (!file.good() && !file.eof()) {
+            throw std::runtime_error(
+                "Network load: error occurred while reading from file '" + filename + "'"
+            );
+        }
+
+        // Replace current network with loaded network
+        *this = std::move(loaded_network);
+
+    } catch (const std::invalid_argument& e) {
+        // Close file and re-throw with context (format/corruption errors)
+        file.close();
+        throw std::invalid_argument(
+            "Network load: invalid or corrupted file '" + filename + "': " + e.what()
+        );
+    } catch (const std::exception& e) {
+        // Close file and re-throw with context (other errors)
+        file.close();
+        throw std::runtime_error(
+            "Network load: failed to deserialize network from file '" + filename + "': " + e.what()
+        );
+    }
+
+    // Close the file
+    file.close();
 }

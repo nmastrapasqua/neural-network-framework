@@ -213,6 +213,38 @@ public:
                             const std::vector<Vector>& test_targets,
                             double threshold = 0.5) const;
 
+    /**
+     * Save the network to a file.
+     *
+     * Opens an output file stream and calls Serializer::serialize() to write
+     * the network structure, weights, and biases to the file in text format.
+     *
+     * Requirements validated:
+     * - 10.1: Serialize network to text format
+     * - 10.4: Enable saving trained networks for later use
+     *
+     * @param filename Path to the file where the network will be saved
+     * @throws std::runtime_error if file cannot be opened or writing fails
+     */
+    void save(const std::string& filename) const;
+
+    /**
+     * Load a network from a file.
+     *
+     * Opens an input file stream and calls Serializer::deserialize() to read
+     * the network structure, weights, and biases from the file.
+     *
+     * This method replaces the current network with the loaded network.
+     *
+     * Requirements validated:
+     * - 10.4: Reconstruct network with same architecture and parameters
+     *
+     * @param filename Path to the file from which to load the network
+     * @throws std::runtime_error if file cannot be opened or reading fails
+     * @throws std::invalid_argument if file format is invalid or corrupted
+     */
+    void load(const std::string& filename);
+
 private:
     std::vector<Layer> layers_;
 
