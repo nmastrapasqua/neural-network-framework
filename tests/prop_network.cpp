@@ -608,3 +608,383 @@ int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+
+// **Validates: Requirements 11.2**
+// Feature: neural-network-framework, Property 30: Validation Without Parameter Changes
+// For any network with parameters θ, running validation on a test dataset should leave
+// all parameters unchanged: θ_after = θ_before.
+RC_GTEST_PROP(NetworkPropertyTest, ValidationWithoutParameterChanges, ()) {
+    // Generate a small topology
+    size_t num_layers = *rc::gen::inRange<size_t>(2, 4);
+    std::vector<size_t> topology;
+    topology.reserve(num_layers + 1);
+    for (size_t i = 0; i <= num_layers; ++i) {
+        topology.push_back(*rc::gen::inRange<size_t>(2, 8));
+    }
+
+    size_t input_size = topology[0];
+    size_t output_size = topology.back();
+
+    // Create network
+    Network network;
+
+    for (size_t i = 0; i < num_layers; ++i) {
+        auto activation = *arbActivation();
+        network.addLayer(topology[i], topology[i + 1], activation);
+
+        // Initialize weights to small random values
+        network.getLayer(i).initializeWeights(-0.5, 0.5);
+    }
+
+    // Store original parameters (weights and biases) for all layers
+    std::vector<Matrix> original_weights;
+    std::vector<Vector> original_biases;
+
+    for (size_t l = 0; l < num_layers; ++l) {
+        const Layer& layer = network.getLayer(l);
+        original_weights.push_back(layer.getWeights());
+        original_biases.push_back(layer.getBiases());
+    }
+
+    // Create test dataset
+    size_t num_test_examples = *rc::gen::inRange<size_t>(5, 20);
+    std::vector<Vector> test_inputs;
+    std::vector<Vector> test_targets;
+
+    for (size_t i = 0; i < num_test_examples; ++i) {
+        Vector input(input_size);
+        for (size_t j = 0; j < input_size; ++j) {
+            input[j] = *genDoubleInRange(-1.0, 1.0);
+        }
+        test_inputs.push_back(input);
+
+        Vector target(output_size);
+        for (size_t j = 0; j < output_size; ++j) {
+            target[j] = *genDoubleInRange(-1.0, 1.0);
+        }
+        test_targets.push_back(target);
+    }
+
+    // Perform validation
+    MeanSquaredError loss_function;
+    double validation_loss = network.validate(test_inputs, test_targets, loss_function);
+
+    // Verify validation loss is finite
+    RC_ASSERT(std::isfinite(validation_loss));
+    RC_ASSERT(validation_loss >= 0.0);
+
+    // Verify that all parameters remain unchanged after validation
+    for (size_t l = 0; l < num_layers; ++l) {
+        const Layer& layer = network.getLayer(l);
+        const Matrix& current_weights = layer.getWeights();
+        const Vector& current_biases = layer.getBiases();
+
+        // Check weights unchanged
+        RC_ASSERT(current_weights.rows() == original_weights[l].rows());
+        RC_ASSERT(current_weights.cols() == original_weights[l].cols());
+
+        for (size_t i = 0; i < current_weights.rows(); ++i) {
+            for (size_t j = 0; j < current_weights.cols(); ++j) {
+                RC_ASSERT(approxEqual(current_weights(i, j), original_weights[l](i, j), 1e-12));
+            }
+        }
+
+        // Check biases unchanged
+        RC_ASSERT(current_biases.size() == original_biases[l].size());
+
+        for (size_t i = 0; i < current_biases.size(); ++i) {
+            RC_ASSERT(approxEqual(current_biases[i], original_biases[l][i], 1e-12));
+        }
+    }
+}
+
+// **Validates: Requirements 11.1, 11.3, 11.5**
+// Feature: neural-network-framework, Property 31: Accuracy Computation
+// For any classification dataset and network, the computed accuracy should equal
+// the fraction of examples where the predicted class matches the target class.
+RC_GTEST_PROP(NetworkPropertyTest, AccuracyComputation, ()) {
+    // Generate a small topology for classification
+    size_t num_layers = *rc::gen::inRange<size_t>(2, 4);
+    std::vector<size_t> topology;
+    topology.reserve(num_layers + 1);
+    for (size_t i = 0; i < num_layers; ++i) {
+        topology.push_back(*rc::gen::inRange<size_t>(2, 8));
+    }
+    // Output layer should have at least 2 classes for classification
+    topology.push_back(*rc::gen::inRange<size_t>(2, 10));
+
+    size_t input_size = topology[0];
+    size_t output_size = topology.back();
+
+    // Create network
+    Network network;
+
+    for (size_t i = 0; i < num_layers; ++i) {
+        auto activation = *arbActivation();
+        network.addLayer(topology[i], topology[i + 1], activation);
+
+        // Initialize weights to small random values
+        network.getLayer(i).initializeWeights(-0.5, 0.5);
+    }
+
+    // Create test dataset with known predictions
+    size_t num_test_examples = *rc::gen::inRange<size_t>(10, 30);
+    std::vector<Vector> test_inputs;
+    std::vector<Vector> test_targets;
+
+    for (size_t i = 0; i < num_test_examples; ++i) {
+        Vector input(input_size);
+        for (size_t j = 0; j < input_size; ++j) {
+            input[j] = *genDoubleInRange(-1.0, 1.0);
+        }
+        test_inputs.push_back(input);
+
+        // Create one-hot encoded target
+        Vector target(output_size, 0.0);
+        size_t target_class = *rc::gen::inRange<size_t>(0, output_size);
+        target[target_class] = 1.0;
+        test_targets.push_back(target);
+    }
+
+    // Calculate accuracy using the network method
+    double calculated_accuracy = network.calculateAccuracy(test_inputs, test_targets);
+
+    // Verify accuracy is in valid range [0.0, 1.0]
+    RC_ASSERT(calculated_accuracy >= 0.0);
+    RC_ASSERT(calculated_accuracy <= 1.0);
+
+    // Manually compute expected accuracy to verify correctness
+    size_t correct_predictions = 0;
+
+    for (size_t i = 0; i < num_test_examples; ++i) {
+        Vector prediction = network.predict(test_inputs[i]);
+
+        // Find predicted class (argmax of prediction)
+        size_t predicted_class = 0;
+        double max_predicted_value = prediction[0];
+        for (size_t j = 1; j < output_size; ++j) {
+            if (prediction[j] > max_predicted_value) {
+                max_predicted_value = prediction[j];
+                predicted_class = j;
+            }
+        }
+
+        // Find target class (argmax of target)
+        size_t target_class = 0;
+        double max_target_value = test_targets[i][0];
+        for (size_t j = 1; j < output_size; ++j) {
+            if (test_targets[i][j] > max_target_value) {
+                max_target_value = test_targets[i][j];
+                target_class = j;
+            }
+        }
+
+        // Check if prediction matches target
+        if (predicted_class == target_class) {
+            correct_predictions++;
+        }
+    }
+
+    double expected_accuracy = static_cast<double>(correct_predictions) / num_test_examples;
+
+    // Verify that calculated accuracy matches expected accuracy
+    RC_ASSERT(approxEqual(calculated_accuracy, expected_accuracy, 1e-9));
+}
+
+// Additional property: Verify validation rejects empty dataset
+RC_GTEST_PROP(NetworkPropertyTest, ValidationRejectsEmptyDataset, ()) {
+    // Generate a small topology
+    size_t num_layers = *rc::gen::inRange<size_t>(2, 3);
+    std::vector<size_t> topology;
+    topology.reserve(num_layers + 1);
+    for (size_t i = 0; i <= num_layers; ++i) {
+        topology.push_back(*rc::gen::inRange<size_t>(2, 5));
+    }
+
+    // Create network
+    Network network;
+
+    for (size_t i = 0; i < num_layers; ++i) {
+        auto activation = *arbActivation();
+        network.addLayer(topology[i], topology[i + 1], activation);
+        network.getLayer(i).initializeWeights(-0.5, 0.5);
+    }
+
+    // Create empty test dataset
+    std::vector<Vector> empty_inputs;
+    std::vector<Vector> empty_targets;
+
+    MeanSquaredError loss_function;
+
+    // Verify that validation with empty dataset throws an exception
+    RC_ASSERT_THROWS_AS(
+        network.validate(empty_inputs, empty_targets, loss_function),
+        std::invalid_argument
+    );
+}
+
+// Additional property: Verify accuracy rejects empty dataset
+RC_GTEST_PROP(NetworkPropertyTest, AccuracyRejectsEmptyDataset, ()) {
+    // Generate a small topology
+    size_t num_layers = *rc::gen::inRange<size_t>(2, 3);
+    std::vector<size_t> topology;
+    topology.reserve(num_layers + 1);
+    for (size_t i = 0; i <= num_layers; ++i) {
+        topology.push_back(*rc::gen::inRange<size_t>(2, 5));
+    }
+
+    // Create network
+    Network network;
+
+    for (size_t i = 0; i < num_layers; ++i) {
+        auto activation = *arbActivation();
+        network.addLayer(topology[i], topology[i + 1], activation);
+        network.getLayer(i).initializeWeights(-0.5, 0.5);
+    }
+
+    // Create empty test dataset
+    std::vector<Vector> empty_inputs;
+    std::vector<Vector> empty_targets;
+
+    // Verify that accuracy calculation with empty dataset throws an exception
+    RC_ASSERT_THROWS_AS(
+        network.calculateAccuracy(empty_inputs, empty_targets),
+        std::invalid_argument
+    );
+}
+
+// Additional property: Verify validation rejects mismatched input/target sizes
+RC_GTEST_PROP(NetworkPropertyTest, ValidationRejectsMismatchedDatasetSizes, ()) {
+    // Generate a small topology
+    size_t num_layers = *rc::gen::inRange<size_t>(2, 3);
+    std::vector<size_t> topology;
+    topology.reserve(num_layers + 1);
+    for (size_t i = 0; i <= num_layers; ++i) {
+        topology.push_back(*rc::gen::inRange<size_t>(2, 5));
+    }
+
+    size_t input_size = topology[0];
+    size_t output_size = topology.back();
+
+    // Create network
+    Network network;
+
+    for (size_t i = 0; i < num_layers; ++i) {
+        auto activation = *arbActivation();
+        network.addLayer(topology[i], topology[i + 1], activation);
+        network.getLayer(i).initializeWeights(-0.5, 0.5);
+    }
+
+    // Create test dataset with mismatched sizes
+    size_t num_inputs = *rc::gen::inRange<size_t>(5, 10);
+    size_t num_targets = num_inputs + 1;  // Intentionally different
+
+    std::vector<Vector> test_inputs;
+    std::vector<Vector> test_targets;
+
+    for (size_t i = 0; i < num_inputs; ++i) {
+        Vector input(input_size);
+        for (size_t j = 0; j < input_size; ++j) {
+            input[j] = *genDoubleInRange(-1.0, 1.0);
+        }
+        test_inputs.push_back(input);
+    }
+
+    for (size_t i = 0; i < num_targets; ++i) {
+        Vector target(output_size);
+        for (size_t j = 0; j < output_size; ++j) {
+            target[j] = *genDoubleInRange(-1.0, 1.0);
+        }
+        test_targets.push_back(target);
+    }
+
+    MeanSquaredError loss_function;
+
+    // Verify that validation with mismatched dataset sizes throws an exception
+    RC_ASSERT_THROWS_AS(
+        network.validate(test_inputs, test_targets, loss_function),
+        std::invalid_argument
+    );
+}
+
+// Additional property: Verify calculateAccuracy does not modify parameters
+RC_GTEST_PROP(NetworkPropertyTest, AccuracyCalculationWithoutParameterChanges, ()) {
+    // Generate a small topology
+    size_t num_layers = *rc::gen::inRange<size_t>(2, 3);
+    std::vector<size_t> topology;
+    topology.reserve(num_layers + 1);
+    for (size_t i = 0; i <= num_layers; ++i) {
+        topology.push_back(*rc::gen::inRange<size_t>(2, 5));
+    }
+
+    size_t input_size = topology[0];
+    size_t output_size = topology.back();
+
+    // Create network
+    Network network;
+
+    for (size_t i = 0; i < num_layers; ++i) {
+        auto activation = *arbActivation();
+        network.addLayer(topology[i], topology[i + 1], activation);
+        network.getLayer(i).initializeWeights(-0.5, 0.5);
+    }
+
+    // Store original parameters
+    std::vector<Matrix> original_weights;
+    std::vector<Vector> original_biases;
+
+    for (size_t l = 0; l < num_layers; ++l) {
+        const Layer& layer = network.getLayer(l);
+        original_weights.push_back(layer.getWeights());
+        original_biases.push_back(layer.getBiases());
+    }
+
+    // Create test dataset
+    size_t num_test_examples = *rc::gen::inRange<size_t>(5, 15);
+    std::vector<Vector> test_inputs;
+    std::vector<Vector> test_targets;
+
+    for (size_t i = 0; i < num_test_examples; ++i) {
+        Vector input(input_size);
+        for (size_t j = 0; j < input_size; ++j) {
+            input[j] = *genDoubleInRange(-1.0, 1.0);
+        }
+        test_inputs.push_back(input);
+
+        Vector target(output_size, 0.0);
+        size_t target_class = *rc::gen::inRange<size_t>(0, output_size);
+        target[target_class] = 1.0;
+        test_targets.push_back(target);
+    }
+
+    // Calculate accuracy
+    double accuracy = network.calculateAccuracy(test_inputs, test_targets);
+
+    // Verify accuracy is in valid range
+    RC_ASSERT(accuracy >= 0.0);
+    RC_ASSERT(accuracy <= 1.0);
+
+    // Verify that all parameters remain unchanged after accuracy calculation
+    for (size_t l = 0; l < num_layers; ++l) {
+        const Layer& layer = network.getLayer(l);
+        const Matrix& current_weights = layer.getWeights();
+        const Vector& current_biases = layer.getBiases();
+
+        // Check weights unchanged
+        RC_ASSERT(current_weights.rows() == original_weights[l].rows());
+        RC_ASSERT(current_weights.cols() == original_weights[l].cols());
+
+        for (size_t i = 0; i < current_weights.rows(); ++i) {
+            for (size_t j = 0; j < current_weights.cols(); ++j) {
+                RC_ASSERT(approxEqual(current_weights(i, j), original_weights[l](i, j), 1e-12));
+            }
+        }
+
+        // Check biases unchanged
+        RC_ASSERT(current_biases.size() == original_biases[l].size());
+
+        for (size_t i = 0; i < current_biases.size(); ++i) {
+            RC_ASSERT(approxEqual(current_biases[i], original_biases[l][i], 1e-12));
+        }
+    }
+}

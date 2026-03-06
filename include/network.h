@@ -163,6 +163,56 @@ public:
      */
     const Layer& getLayer(size_t index) const;
 
+    /**
+     * Validate the network on a test dataset without updating parameters.
+     *
+     * Performs forward pass on all test examples and computes average loss.
+     * This method does NOT modify any network parameters (weights or biases).
+     *
+     * Requirements validated:
+     * - 11.2: Execute forward pass on all test examples without updating parameters
+     * - 11.3: Calculate performance metrics (average loss)
+     *
+     * @param test_inputs Vector of test input vectors
+     * @param test_targets Vector of test target output vectors
+     * @param loss_function Loss function to measure prediction error
+     * @return Average loss over the test dataset
+     * @throws std::invalid_argument if validation fails (empty dataset, size mismatch)
+     */
+    double validate(const std::vector<Vector>& test_inputs,
+                    const std::vector<Vector>& test_targets,
+                    LossFunction& loss_function) const;
+
+    /**
+     * Calculate accuracy on a test dataset.
+     *
+     * For classification tasks, compares predicted class with target class.
+     * A prediction is correct if the index of the maximum value in the output
+     * matches the index of the maximum value in the target.
+     *
+     * For regression tasks with binary outputs, uses threshold to determine correctness.
+     * A prediction is correct if |predicted - target| <= threshold for all outputs.
+     *
+     * This method does NOT modify any network parameters.
+     *
+     * Requirements validated:
+     * - 11.1: Provide method to calculate accuracy on test dataset
+     * - 11.2: Execute forward pass without updating parameters
+     * - 11.3: Calculate performance metrics (accuracy)
+     * - 11.5: Compare output with target using configurable threshold
+     *
+     * @param test_inputs Vector of test input vectors
+     * @param test_targets Vector of test target output vectors
+     * @param threshold Threshold for determining correctness (default = 0.5)
+     *                  For classification: not used (uses argmax comparison)
+     *                  For regression: maximum allowed error per output
+     * @return Fraction of correct predictions (0.0 to 1.0)
+     * @throws std::invalid_argument if validation fails (empty dataset, size mismatch)
+     */
+    double calculateAccuracy(const std::vector<Vector>& test_inputs,
+                            const std::vector<Vector>& test_targets,
+                            double threshold = 0.5) const;
+
 private:
     std::vector<Layer> layers_;
 

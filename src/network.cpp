@@ -3,6 +3,7 @@
 #include "training_monitor.h"
 #include <stdexcept>
 #include <algorithm>
+#include <cmath>
 
 /**
  * Construct an empty network.
@@ -623,4 +624,204 @@ void Network::updateParameters(const std::vector<Matrix>& weight_gradients,
             biases[i] = biases[i] - learning_rate * bias_grad[i];
         }
     }
+}
+
+/**
+ * Validate the network on a test dataset without updating parameters.
+ *
+ * Performs forward pass on all test examples and computes average loss.
+ * This method is const, ensuring no network parameters are modified.
+ *
+ * Implements:
+ * - Requirement 11.2: Execute forward pass on all test examples without updating parameters
+ * - Requirement 11.3: Calculate performance metrics (average loss)
+ *
+ * Algorithm:
+ * 1. Validate inputs (non-empty, matching sizes)
+ * 2. For each test example:
+ *    a. Forward pass: output = predict(input)
+ *    b. Compute loss: L = loss_function.compute(output, target)
+ *    c. Accumulate loss
+ * 3. Return average loss: total_loss / num_examples
+ *
+ * @param test_inputs Vector of test input vectors
+ * @param test_targets Vector of test target output vectors
+ * @param loss_function Loss function to measure prediction error
+ * @return Average loss over the test dataset
+ * @throws std::invalid_argument if validation fails
+ */
+double Network::validate(const std::vector<Vector>& test_inputs,
+                        const std::vector<Vector>& test_targets,
+                        LossFunction& loss_function) const {
+    // Validate test dataset
+    if (test_inputs.empty()) {
+        throw std::invalid_argument(
+            "Network validate: test_inputs cannot be empty"
+        );
+    }
+
+    if (test_inputs.size() != test_targets.size()) {
+        throw std::invalid_argument(
+            "Network validate: test_inputs size " + std::to_string(test_inputs.size()) +
+            " does not match test_targets size " + std::to_string(test_targets.size())
+        );
+    }
+
+    // Validate network has layers
+    if (layers_.empty()) {
+        throw std::invalid_argument(
+            "Network validate: cannot validate with empty network"
+        );
+    }
+
+    // Accumulate loss over all test examples
+    double total_loss = 0.0;
+    size_t num_examples = test_inputs.size();
+
+    // Requirement 11.2: Execute forward pass without updating parameters
+    // (This method is const, so parameters cannot be modified)
+    for (size_t i = 0; i < num_examples; ++i) {
+        // Forward pass to get prediction
+        // Note: We need to cast away const temporarily for predict()
+        // This is safe because predict() doesn't modify parameters, only cached values
+        Vector output = const_cast<Network*>(this)->predict(test_inputs[i]);
+
+        // Compute loss for this example
+        double loss = loss_function.compute(output, test_targets[i]);
+        total_loss += loss;
+    }
+
+    // Requirement 11.3: Calculate and return average loss
+    double average_loss = total_loss / num_examples;
+    return average_loss;
+}
+
+/**
+ * Calculate accuracy on a test dataset.
+ *
+ * For classification tasks (multi-class outputs), uses argmax comparison:
+ * - A prediction is correct if argmax(predicted) == argmax(target)
+ *
+ * For regression/binary tasks (when threshold is used):
+ * - A prediction is correct if all outputs are within threshold of target
+ *
+ * This method is const, ensuring no network parameters are modified.
+ *
+ * Implements:
+ * - Requirement 11.1: Provide method to calculate accuracy on test dataset
+ * - Requirement 11.2: Execute forward pass without updating parameters
+ * - Requirement 11.3: Calculate performance metrics (accuracy)
+ * - Requirement 11.5: Compare output with target using configurable threshold
+ *
+ * Algorithm:
+ * 1. Validate inputs (non-empty, matching sizes)
+ * 2. For each test example:
+ *    a. Forward pass: output = predict(input)
+ *    b. Determine if prediction is correct:
+ *       - For multi-class: argmax(output) == argmax(target)
+ *       - For regression: |output[i] - target[i]| <= threshold for all i
+ *    c. Count correct predictions
+ * 3. Return accuracy: correct_predictions / num_examples
+ *
+ * @param test_inputs Vector of test input vectors
+ * @param test_targets Vector of test target output vectors
+ * @param threshold Threshold for determining correctness (default = 0.5)
+ *                  For classification: not used (uses argmax comparison)
+ *                  For regression: maximum allowed error per output
+ * @return Fraction of correct predictions (0.0 to 1.0)
+ * @throws std::invalid_argument if validation fails
+ */
+double Network::calculateAccuracy(const std::vector<Vector>& test_inputs,
+                                 const std::vector<Vector>& test_targets,
+                                 double threshold) const {
+    // Validate test dataset
+    if (test_inputs.empty()) {
+        throw std::invalid_argument(
+            "Network calculateAccuracy: test_inputs cannot be empty"
+        );
+    }
+
+    if (test_inputs.size() != test_targets.size()) {
+        throw std::invalid_argument(
+            "Network calculateAccuracy: test_inputs size " + std::to_string(test_inputs.size()) +
+            " does not match test_targets size " + std::to_string(test_targets.size())
+        );
+    }
+
+    // Validate network has layers
+    if (layers_.empty()) {
+        throw std::invalid_argument(
+            "Network calculateAccuracy: cannot calculate accuracy with empty network"
+        );
+    }
+
+    // Validate threshold is non-negative
+    if (threshold < 0.0) {
+        throw std::invalid_argument(
+            "Network calculateAccuracy: threshold must be non-negative, got " +
+            std::to_string(threshold)
+        );
+    }
+
+    size_t correct_predictions = 0;
+    size_t num_examples = test_inputs.size();
+
+    // Requirement 11.2: Execute forward pass without updating parameters
+    // (This method is const, so parameters cannot be modified)
+    for (size_t i = 0; i < num_examples; ++i) {
+        // Forward pass to get prediction
+        // Note: We need to cast away const temporarily for predict()
+        // This is safe because predict() doesn't modify parameters, only cached values
+        Vector output = const_cast<Network*>(this)->predict(test_inputs[i]);
+        const Vector& target = test_targets[i];
+
+        // Validate output and target have same size
+        if (output.size() != target.size()) {
+            throw std::invalid_argument(
+                "Network calculateAccuracy: output size " + std::to_string(output.size()) +
+                " does not match target size " + std::to_string(target.size()) +
+                " for example " + std::to_string(i)
+            );
+        }
+
+        // Requirement 11.5: Compare output with target using threshold
+        // Determine if prediction is correct based on output size
+        bool is_correct = false;
+
+        if (output.size() == 1) {
+            // Binary/regression case: use threshold
+            // Correct if |predicted - target| <= threshold
+            double error = std::abs(output[0] - target[0]);
+            is_correct = (error <= threshold);
+        } else {
+            // Multi-class classification case: use argmax comparison
+            // Find index of maximum value in output and target
+            size_t predicted_class = 0;
+            size_t target_class = 0;
+            double max_output = output[0];
+            double max_target = target[0];
+
+            for (size_t j = 1; j < output.size(); ++j) {
+                if (output[j] > max_output) {
+                    max_output = output[j];
+                    predicted_class = j;
+                }
+                if (target[j] > max_target) {
+                    max_target = target[j];
+                    target_class = j;
+                }
+            }
+
+            // Correct if predicted class matches target class
+            is_correct = (predicted_class == target_class);
+        }
+
+        if (is_correct) {
+            correct_predictions++;
+        }
+    }
+
+    // Requirement 11.1, 11.3: Calculate and return accuracy as fraction of correct predictions
+    double accuracy = static_cast<double>(correct_predictions) / num_examples;
+    return accuracy;
 }
