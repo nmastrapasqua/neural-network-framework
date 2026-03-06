@@ -304,6 +304,196 @@ void Network::backpropagate(const Vector& target,
 }
 
 /**
+ * Train the network on a dataset using backpropagation with batch support.
+ *
+ * Implements training loop with configurable batch size according to Requirements 8.1-8.10.
+ *
+ * Batch Training Modes:
+ * - batch_size = 1: Stochastic Gradient Descent (SGD)
+ *   Updates parameters after each example
+ *
+ * - batch_size = 32 (typical): Mini-batch Gradient Descent
+ *   Accumulates gradients over 32 examples, averages them, then updates
+ *
+ * - batch_size = dataset_size: Batch Gradient Descent
+ *   Accumulates gradients over entire dataset, averages them, then updates once per epoch
+ *
+ * Algorithm:
+ * For each epoch:
+ *   Initialize epoch loss accumulator
+ *   For each batch in dataset:
+ *     Initialize gradient accumulators (zero matrices/vectors)
+ *     For each example in batch:
+ *       1. Forward pass: output = predict(input)
+ *       2. Compute loss: L = loss_function.compute(output, target)
+ *       3. Backpropagation: compute gradients for this example
+ *       4. Accumulate gradients
+ *     Average accumulated gradients: gradient_avg = gradient_sum / batch_size
+ *     Update parameters: θ := θ - η * gradient_avg
+ *   Compute average loss for epoch: epoch_loss / num_examples
+ *
+ * @param inputs Vector of input vectors (training examples)
+ * @param targets Vector of target output vectors (labels)
+ * @param epochs Number of complete passes through the dataset
+ * @param learning_rate Learning rate (η) for gradient descent
+ * @param loss_function Loss function to measure prediction error
+ * @param batch_size Number of examples per batch (default = 1 for SGD)
+ * @return Vector of average loss values (one per epoch)
+ * @throws std::invalid_argument if validation fails
+ */
+std::vector<double> Network::train(const std::vector<Vector>& inputs,
+                                   const std::vector<Vector>& targets,
+                                   size_t epochs,
+                                   double learning_rate,
+                                   LossFunction& loss_function,
+                                   size_t batch_size) {
+    // Requirement 8.1: Validate training dataset
+    if (inputs.empty()) {
+        throw std::invalid_argument(
+            "Network train: inputs cannot be empty"
+        );
+    }
+
+    if (inputs.size() != targets.size()) {
+        throw std::invalid_argument(
+            "Network train: inputs size " + std::to_string(inputs.size()) +
+            " does not match targets size " + std::to_string(targets.size())
+        );
+    }
+
+    // Validate network has layers
+    if (layers_.empty()) {
+        throw std::invalid_argument(
+            "Network train: cannot train empty network. Add layers first."
+        );
+    }
+
+    // Validate epochs
+    if (epochs == 0) {
+        throw std::invalid_argument(
+            "Network train: epochs must be greater than zero"
+        );
+    }
+
+    // Validate learning rate
+    if (learning_rate <= 0.0) {
+        throw std::invalid_argument(
+            "Network train: learning_rate must be positive, got " +
+            std::to_string(learning_rate)
+        );
+    }
+
+    // Requirement 8.10: Validate batch_size
+    size_t dataset_size = inputs.size();
+    if (batch_size == 0) {
+        throw std::invalid_argument(
+            "Network train: batch_size must be greater than zero"
+        );
+    }
+
+    if (batch_size > dataset_size) {
+        throw std::invalid_argument(
+            "Network train: batch_size " + std::to_string(batch_size) +
+            " cannot be greater than dataset size " + std::to_string(dataset_size)
+        );
+    }
+
+    // Storage for loss history (one value per epoch)
+    std::vector<double> loss_history;
+    loss_history.reserve(epochs);
+
+    // Requirement 8.2: Iterate through dataset for specified number of epochs
+    for (size_t epoch = 0; epoch < epochs; ++epoch) {
+        double epoch_loss = 0.0;
+        size_t num_batches = (dataset_size + batch_size - 1) / batch_size;  // ceiling division
+
+        // Process dataset in batches
+        for (size_t batch_idx = 0; batch_idx < num_batches; ++batch_idx) {
+            // Determine batch boundaries
+            size_t batch_start = batch_idx * batch_size;
+            size_t batch_end = std::min(batch_start + batch_size, dataset_size);
+            size_t current_batch_size = batch_end - batch_start;
+
+            // Initialize gradient accumulators (zero-initialized)
+            std::vector<Matrix> accumulated_weight_gradients;
+            std::vector<Vector> accumulated_bias_gradients;
+
+            // Initialize accumulators with correct dimensions (all zeros)
+            for (size_t l = 0; l < layers_.size(); ++l) {
+                const Layer& layer = layers_[l];
+                accumulated_weight_gradients.emplace_back(
+                    layer.outputSize(), layer.inputSize(), 0.0
+                );
+                accumulated_bias_gradients.emplace_back(
+                    layer.outputSize(), 0.0
+                );
+            }
+
+            // Requirement 8.5: Accumulate gradients over batch
+            for (size_t i = batch_start; i < batch_end; ++i) {
+                // 1. Forward pass
+                Vector output = predict(inputs[i]);
+
+                // 2. Compute loss
+                double loss = loss_function.compute(output, targets[i]);
+                epoch_loss += loss;
+
+                // 3. Backpropagation: compute gradients for this example
+                std::vector<Matrix> example_weight_gradients;
+                std::vector<Vector> example_bias_gradients;
+                backpropagate(targets[i], loss_function,
+                            example_weight_gradients, example_bias_gradients);
+
+                // 4. Accumulate gradients
+                for (size_t l = 0; l < layers_.size(); ++l) {
+                    // Accumulate weight gradients
+                    for (size_t row = 0; row < accumulated_weight_gradients[l].rows(); ++row) {
+                        for (size_t col = 0; col < accumulated_weight_gradients[l].cols(); ++col) {
+                            accumulated_weight_gradients[l](row, col) +=
+                                example_weight_gradients[l](row, col);
+                        }
+                    }
+
+                    // Accumulate bias gradients
+                    for (size_t j = 0; j < accumulated_bias_gradients[l].size(); ++j) {
+                        accumulated_bias_gradients[l][j] += example_bias_gradients[l][j];
+                    }
+                }
+            }
+
+            // Requirement 8.5: Average accumulated gradients over batch size
+            // (For batch_size = 1, this is just the single example's gradient)
+            for (size_t l = 0; l < layers_.size(); ++l) {
+                // Average weight gradients
+                for (size_t row = 0; row < accumulated_weight_gradients[l].rows(); ++row) {
+                    for (size_t col = 0; col < accumulated_weight_gradients[l].cols(); ++col) {
+                        accumulated_weight_gradients[l](row, col) /= current_batch_size;
+                    }
+                }
+
+                // Average bias gradients
+                for (size_t j = 0; j < accumulated_bias_gradients[l].size(); ++j) {
+                    accumulated_bias_gradients[l][j] /= current_batch_size;
+                }
+            }
+
+            // Update parameters using averaged gradients
+            // Requirement 8.4: When batch_size = 1, this updates after each example (SGD)
+            // Requirement 8.6: When batch_size = dataset_size, this updates once per epoch
+            updateParameters(accumulated_weight_gradients,
+                           accumulated_bias_gradients,
+                           learning_rate);
+        }
+
+        // Requirement 8.7: Calculate and store average loss per epoch
+        double avg_epoch_loss = epoch_loss / dataset_size;
+        loss_history.push_back(avg_epoch_loss);
+    }
+
+    return loss_history;
+}
+
+/**
  * Update network parameters using computed gradients.
  *
  * Implements gradient descent parameter update according to Requirements 7.1-7.5:

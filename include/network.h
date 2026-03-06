@@ -94,6 +94,53 @@ public:
     std::vector<size_t> getTopology() const;
 
     /**
+     * Train the network on a dataset using backpropagation with batch support.
+     *
+     * Implements training loop with configurable batch size:
+     * - batch_size = 1: Stochastic Gradient Descent (SGD) - update after each example
+     * - batch_size = 32 (typical): Mini-batch Gradient Descent - update after 32 examples
+     * - batch_size = dataset_size: Batch Gradient Descent - update once per epoch
+     *
+     * Algorithm:
+     * For each epoch:
+     *   For each batch in dataset:
+     *     Initialize gradient accumulator
+     *     For each example in batch:
+     *       1. Forward pass: compute output
+     *       2. Compute loss
+     *       3. Backpropagation: compute gradients
+     *       4. Accumulate gradients
+     *     Average accumulated gradients over batch size
+     *     Update parameters using averaged gradients
+     *   Compute and record average loss for epoch
+     *
+     * Requirements validated:
+     * - 8.1: Accept training dataset with input-target pairs
+     * - 8.2: Iterate through dataset for specified number of epochs
+     * - 8.3: Support configurable batch_size parameter
+     * - 8.4: Execute SGD when batch_size = 1
+     * - 8.5: Accumulate and average gradients when batch_size > 1
+     * - 8.6: Execute batch gradient descent when batch_size = dataset_size
+     * - 8.7: Calculate and store average loss per epoch
+     * - 8.10: Validate batch_size is > 0 and <= dataset size
+     *
+     * @param inputs Vector of input vectors (training examples)
+     * @param targets Vector of target output vectors (labels)
+     * @param epochs Number of complete passes through the dataset
+     * @param learning_rate Learning rate (η) for gradient descent
+     * @param loss_function Loss function to measure prediction error
+     * @param batch_size Number of examples per batch (default = 1 for SGD)
+     * @return Vector of average loss values (one per epoch)
+     * @throws std::invalid_argument if validation fails
+     */
+    std::vector<double> train(const std::vector<Vector>& inputs,
+                              const std::vector<Vector>& targets,
+                              size_t epochs,
+                              double learning_rate,
+                              LossFunction& loss_function,
+                              size_t batch_size = 1);
+
+    /**
      * Get a reference to a specific layer for weight initialization or inspection.
      *
      * @param index Layer index (0-based)
