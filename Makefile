@@ -89,8 +89,16 @@ run_mnist: $(BIN_DIR)/mnist_example
 	@echo "Running MNIST example..."
 	@$(BIN_DIR)/mnist_example
 
+run_iris: $(BIN_DIR)/iris_example
+	@echo "Running Iris example..."
+	@$(BIN_DIR)/iris_example
+
+run_sin: $(BIN_DIR)/sin_regression_example
+	@echo "Running sin(x) regression example..."
+	@$(BIN_DIR)/sin_regression_example
+
 # Run all examples
-run_all: run_xor run_binary run_save_load
+run_all: run_xor run_binary run_save_load run_mnist run_iris run_sin
 
 # Run tests
 test: tests
@@ -128,20 +136,24 @@ help:
 	@echo "examples     : Build all example programs"
 	@echo "tests        : Build all unit test programs"
 	@echo "prop_tests   : Build all property test programs"
-	@echo "test         : Build and run unit tests"
-	@echo "test_prop    : Build and run property tests (RapidCheck)"
+	@echo "test_unit    : Build and run unit tests"
+	@echo "test_property: Build and run property tests (RapidCheck)"
+	@echo "test         : Alias for test_unit"
+	@echo "test_prop    : Alias for test_property"
 	@echo "test_all     : Build and run all tests (unit + property)"
 	@echo "run_xor      : Run XOR example"
 	@echo "run_binary   : Run binary classification example"
 	@echo "run_save_load: Run save/load example"
 	@echo "run_mnist    : Run MNIST example"
+	@echo "run_iris     : Run Iris classification example"
+	@echo "run_sin      : Run sin(x) regression example"
 	@echo "run_all      : Run all examples"
 	@echo "clean        : Remove all build artifacts"
 	@echo "rebuild      : Clean and rebuild"
 	@echo "help         : Show this help message"
 
 # Phony targets
-.PHONY: all debug release examples tests prop_tests test test_prop test_all run_xor run_binary run_save_load run_mnist run_all clean rebuild help
+.PHONY: all debug release examples tests prop_tests test test_unit test_property test_prop test_all run_xor run_binary run_save_load run_mnist run_iris run_sin run_all clean rebuild help
 
 # Dependency tracking (optional, for incremental builds)
 -include $(OBJECTS:.o=.d)
