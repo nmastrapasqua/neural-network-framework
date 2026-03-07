@@ -72,6 +72,7 @@ core.*
 *.idx1-ubyte
 *.zip
 mnist-dataset/
+iris_dataset/
 
 # RapidCheck generated files
 .rapidcheck/
