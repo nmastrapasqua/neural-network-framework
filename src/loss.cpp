@@ -1,4 +1,5 @@
 #include "loss.h"
+#include "validation.h"
 #include <stdexcept>
 #include <cmath>
 
@@ -24,7 +25,12 @@ double MeanSquaredError::compute(const Vector& predicted, const Vector& target) 
         sum_squared_error += diff * diff;
     }
 
-    return sum_squared_error / static_cast<double>(n);
+    double loss = sum_squared_error / static_cast<double>(n);
+
+    // Validate loss is finite (Requirement 12.1)
+    Validation::validateFinite(loss, "MSE loss computation");
+
+    return loss;
 }
 
 Vector MeanSquaredError::gradient(const Vector& predicted, const Vector& target) const {
@@ -43,6 +49,10 @@ Vector MeanSquaredError::gradient(const Vector& predicted, const Vector& target)
 
     for (size_t i = 0; i < n; ++i) {
         grad[i] = scale * (predicted[i] - target[i]);
+
+        // Validate gradient is finite (Requirement 12.1)
+        Validation::validateFinite(grad[i],
+            "MSE gradient at index " + std::to_string(i));
     }
 
     return grad;
@@ -72,6 +82,9 @@ double CrossEntropy::compute(const Vector& predicted, const Vector& target) cons
         loss -= target[i] * std::log(pred_clamped);
     }
 
+    // Validate loss is finite (Requirement 12.1)
+    Validation::validateFinite(loss, "CrossEntropy loss computation");
+
     return loss;
 }
 
@@ -93,6 +106,10 @@ Vector CrossEntropy::gradient(const Vector& predicted, const Vector& target) con
         // Clamp predicted value to avoid division by zero
         double pred_clamped = std::max(EPSILON, predicted[i]);
         grad[i] = -target[i] / pred_clamped;
+
+        // Validate gradient is finite (Requirement 12.1)
+        Validation::validateFinite(grad[i],
+            "CrossEntropy gradient at index " + std::to_string(i));
     }
 
     return grad;

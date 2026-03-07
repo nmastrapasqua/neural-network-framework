@@ -1,4 +1,5 @@
 #include "layer.h"
+#include "validation.h"
 #include <stdexcept>
 #include <cmath>
 
@@ -62,7 +63,15 @@ Vector Layer::forward(const Vector& input) {
     // Apply activation function element-wise
     last_output_ = Vector(last_weighted_sum_.size());
     for (size_t i = 0; i < last_weighted_sum_.size(); ++i) {
+        // Validate weighted sum before activation (Requirement 12.1)
+        Validation::validateFinite(last_weighted_sum_[i],
+            "weighted sum at neuron " + std::to_string(i) + " before activation");
+
         last_output_[i] = activation_->activate(last_weighted_sum_[i]);
+
+        // Validate activation output (Requirement 12.1)
+        Validation::validateFinite(last_output_[i],
+            "activation output at neuron " + std::to_string(i));
     }
 
     return last_output_;

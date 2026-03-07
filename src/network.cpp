@@ -2,6 +2,7 @@
 #include "loss.h"
 #include "training_monitor.h"
 #include "serializer.h"
+#include "validation.h"
 #include <stdexcept>
 #include <algorithm>
 #include <cmath>
@@ -243,6 +244,10 @@ void Network::backpropagate(const Vector& target,
     for (size_t i = 0; i < output.size(); ++i) {
         double activation_deriv = output_activation->derivative(z_output[i]);
         output_delta[i] = loss_grad[i] * activation_deriv;
+
+        // Validate delta is finite (Requirement 12.1)
+        Validation::validateFinite(output_delta[i],
+            "output layer delta at neuron " + std::to_string(i) + " during backpropagation");
     }
 
     // Store output delta at the end (we'll build deltas in reverse order)
@@ -270,6 +275,11 @@ void Network::backpropagate(const Vector& target,
         for (size_t i = 0; i < current_layer.outputSize(); ++i) {
             double activation_deriv = current_activation->derivative(z_current[i]);
             current_delta[i] = backprop_error[i] * activation_deriv;
+
+            // Validate delta is finite (Requirement 12.1)
+            Validation::validateFinite(current_delta[i],
+                "layer " + std::to_string(l) + " delta at neuron " + std::to_string(i) +
+                " during backpropagation");
         }
 
         deltas.push_back(current_delta);
@@ -295,12 +305,23 @@ void Network::backpropagate(const Vector& target,
         for (size_t i = 0; i < output_size; ++i) {
             for (size_t j = 0; j < input_size; ++j) {
                 weight_grad(i, j) = deltas[l][i] * layer_input[j];
+
+                // Validate weight gradient is finite (Requirement 12.1)
+                Validation::validateFinite(weight_grad(i, j),
+                    "weight gradient at layer " + std::to_string(l) +
+                    " position [" + std::to_string(i) + "][" + std::to_string(j) + "]");
             }
         }
 
         weight_gradients.push_back(weight_grad);
 
         // Compute bias gradients: ∂L/∂b^l = δ^l
+        // Validate bias gradients
+        for (size_t i = 0; i < deltas[l].size(); ++i) {
+            Validation::validateFinite(deltas[l][i],
+                "bias gradient at layer " + std::to_string(l) +
+                " position [" + std::to_string(i) + "]");
+        }
         bias_gradients.push_back(deltas[l]);
     }
 
