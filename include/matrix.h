@@ -27,6 +27,7 @@ public:
     // Utilities
     void fill(double value);
     void randomize(double min, double max);
+    void print(const char* name = nullptr) const;  // Print matrix to console
 
 private:
     std::vector<double> data_;  // Row-major order storage

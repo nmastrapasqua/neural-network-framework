@@ -27,6 +27,7 @@ public:
     void fill(double value);
     double sum() const;
     double mean() const;
+    void print(const char* name = nullptr) const;  // Print vector to console
 
 private:
     std::vector<double> data_;

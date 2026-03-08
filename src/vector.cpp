@@ -1,6 +1,8 @@
 #include "vector.h"
 #include <stdexcept>
 #include <numeric>
+#include <iostream>
+#include <iomanip>
 
 // Constructors
 Vector::Vector(size_t size) : data_(size, 0.0) {
@@ -109,4 +111,25 @@ double Vector::mean() const {
         throw std::invalid_argument("Cannot compute mean of empty vector");
     }
     return sum() / static_cast<double>(data_.size());
+}
+
+void Vector::print(const char* name) const {
+    if (name != nullptr) {
+        std::cout << name << " = ";
+    }
+
+    std::cout << "[";
+    for (size_t i = 0; i < data_.size(); ++i) {
+        std::cout << std::fixed << std::setprecision(4) << data_[i];
+        if (i < data_.size() - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "]";
+
+    if (name != nullptr) {
+        std::cout << "  (size: " << data_.size() << ")";
+    }
+
+    std::cout << std::endl;
 }

@@ -2,6 +2,9 @@
 #include <stdexcept>
 #include <random>
 #include <algorithm>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 
 // Constructors
 Matrix::Matrix(size_t rows, size_t cols)
@@ -149,5 +152,36 @@ void Matrix::randomize(double min, double max) {
 
     for (double& value : data_) {
         value = dist(gen);
+    }
+}
+
+void Matrix::print(const char* name) const {
+    if (name != nullptr) {
+        std::cout << name << " (" << rows_ << "x" << cols_ << "):" << std::endl;
+    }
+
+    // Find max width for alignment
+    size_t max_width = 0;
+    for (const auto& val : data_) {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(4) << val;
+        max_width = std::max(max_width, oss.str().length());
+    }
+
+    // Print matrix with aligned columns
+    for (size_t i = 0; i < rows_; ++i) {
+        std::cout << "[";
+        for (size_t j = 0; j < cols_; ++j) {
+            std::cout << std::setw(max_width + 1) << std::fixed
+                      << std::setprecision(4) << (*this)(i, j);
+            if (j < cols_ - 1) {
+                std::cout << " ";
+            }
+        }
+        std::cout << " ]" << std::endl;
+    }
+
+    if (name == nullptr) {
+        std::cout << "(" << rows_ << "x" << cols_ << ")" << std::endl;
     }
 }
