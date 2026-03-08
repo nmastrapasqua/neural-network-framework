@@ -1,0 +1,49 @@
+MNIST network architecture
+--------------------------------------
+Network architecture: [784, 128, 64, 10]
+  - Input layer: 784 neurons (28x28 pixels)
+  - Hidden layer 1: 128 neurons (ReLU activation)
+  - Hidden layer 2: 64 neurons (ReLU activation)
+  - Output layer: 10 neurons (sigmoid activation)
+
+Step 5: Initializing weights
+-----------------------------
+Weights initialized:
+  - Hidden layers: He initialization (optimized for ReLU)
+  - Output layer: Xavier initialization (optimized for sigmoid)
+  - Random seed: 42 (for reproducibility)
+
+Step 6: Configuring training parameters
+----------------------------------------
+Training configuration:
+  - Epochs: 10
+  - Learning rate: 0.01
+  - Loss function: Mean Squared Error (MSE)
+  - Optimization: Stochastic Gradient Descent (SGD)
+  - Training samples: 10000
+  - Test samples: 10000
+
+Step 7: Training the network
+----------------------------
+Training in progress (this may take a few minutes)...
+
+Epoch | Train Loss | Train Acc | Test Acc  | Time (s)
+------|------------|-----------|-----------|----------
+    1 | 0.081399 | 64.69%   | 64.04%    | 251
+    2 | 0.046258 | 77.16%   | 76.16%    | 257
+    3 | 0.034260 | 85.97%   | 85.17%    | 260
+    4 | 0.025557 | 88.75%   | 87.68%    | 347
+    5 | 0.021058 | 89.81%   | 89.14%    | 279
+    6 | 0.018576 | 90.51%   | 89.96%    | 326
+    7 | 0.016942 | 91.15%   | 90.38%    | 394
+    8 | 0.015718 | 91.72%   | 90.77%    | 393
+    9 | 0.014729 | 92.26%   | 91.19%    | 428
+   10 | 0.013893 | 92.55%   | 91.52%    | 374
+
+Training completed in 3315 seconds
+
+Step 8: Final evaluation on test set
+--------------------------------------
+Final test set performance:
+  - Test accuracy: 91.52%
+  - Test loss: 0.015482

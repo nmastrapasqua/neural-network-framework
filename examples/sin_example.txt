@@ -1,0 +1,180 @@
+========================================
+  Sin(x) Function Approximation Demo
+========================================
+
+Step 1: Generating training data
+---------------------------------
+Generated 100 training samples
+Training range: [-3.14, 3.14]
+Function: y = sin(x)
+
+Step 2: Generating test data
+-----------------------------
+Generated 200 test samples
+Test range: [-6.28, 6.28]
+Note: Test range is WIDER than training range
+      This tests extrapolation ability!
+
+Step 3: Creating neural network
+--------------------------------
+Network architecture: [1, 16, 16, 1]
+  - Input layer: 1 neuron (x value)
+  - Hidden layer 1: 16 neurons (tanh)
+  - Hidden layer 2: 16 neurons (tanh)
+  - Output layer: 1 neuron (tanh, outputs in [-1, 1])
+
+Step 4: Initializing weights
+-----------------------------
+Weights initialized with Xavier initialization
+Random seed: 42 (for reproducibility)
+
+Step 5: Training the network
+----------------------------
+Training configuration:
+  - Epochs: 1000
+  - Learning rate: 0.01
+  - Loss function: MSE
+  - Batch size: 1 (SGD)
+
+Training progress (every 200 epochs):
+Epoch | Train Loss | Train MAE | Test MAE
+------|------------|-----------|----------
+    1 | 0.083354 | 0.241622 | 0.851562
+  200 | 0.006752 | 0.100470 | 0.202410
+  400 | 0.005654 | 0.091973 | 0.185140
+  600 | 0.005087 | 0.088709 | 0.182041
+  800 | 0.002735 | 0.067584 | 0.151039
+ 1000 | 0.001322 | 0.034216 | 0.125849
+
+Step 6: Evaluation on training range (interpolation)
+-----------------------------------------------------
+Interpolation MAE: 0.034580
+This measures accuracy within the training range.
+
+Step 7: Evaluation on extended range (extrapolation)
+-----------------------------------------------------
+Extrapolation MAE: 0.221694
+This measures accuracy OUTSIDE the training range.
+Neural networks typically struggle with extrapolation!
+
+Step 8: Visualizing learned function
+-------------------------------------
+
+ASCII Plot - Training Range [-π, π]:
+(This shows how well the network learned within the training data)
+
+       +--------------------------------------------------------------------------------+
+  1.0  |                                                                                |
+       |                                                                                |
+       |                                                     o @* @* @@oo               |
+       |                                                  * @*         **@@*            |
+       |                                                  @                o@*          |
+       |                                                *@                   o@*        |
+       |                                               @o                      o*       |
+       |                                              @                         o@      |
+       |                                             @                            @     |
+       |                                           @                               @    |
+       |                                          o*                                @   |
+       |*                                       @ *                                  @  |
+  0.0  |@--------------------------------------@@-------------------------------------@@|
+       |  @                                   @                                         |
+       |  @                                 *@                                          |
+       |    @                              @o                                           |
+       |     @                            @                                             |
+       |     @ o                         @                                              |
+       |       @                       o@                                               |
+       |       *@ o                  @ *                                                |
+       |          * o               @@                                                  |
+       |            *@*          **                                                     |
+       |              o @@@@@* @@o                                                      |
+       |                                                                                |
+ -1.0  |                                                                                |
+       +--------------------------------------------------------------------------------+
+       -3.14                                                                      3.14
+
+       Legend: o = actual sin(x), * = predicted, @ = overlap (perfect match)
+
+ASCII Plot - Extended Range [-2π, 2π]:
+(This includes extrapolation beyond the training range)
+
+       +--------------------------------------------------------------------------------+
+  1.0  |                                                                                |
+       |                                                                                |
+       |* * ** *@ o o                                  o@@@ o                           |
+       |       o  * *@                                @*  * *@                          |
+       |     o        *                              @       @                          |
+       |     o        o *                          @           *                        |
+       |    o           o*                                     o*                       |
+       |  o                                        @            o                       |
+       |                 o*                       @             *                       |
+       |  o               o                                     o                       |
+       |                   *                    @                 @                     |
+       |o                  o                                                            |
+  0.0  |o-------------------@------------------@@------------------@-------------------o|
+       |                     *                                     @                  o |
+       |                     o                @                                         |
+       |                     @                                       @               o  |
+       |                                     @                        @                 |
+       |                       o            @                          *            o   |
+       |                       *o                                      o*          o    |
+       |                        *          @                            o*        o     |
+       |                         @        @                              o**     o      |
+       |                          *     *@                                o ****@       |
+       |                          o @* @o                                  ooooo *******|
+       |                                                                                |
+ -1.0  |                                                                                |
+       +--------------------------------------------------------------------------------+
+       -6.28                                                                      6.28
+
+       Legend: o = actual sin(x), * = predicted, @ = overlap (perfect match)
+
+Step 9: Sample predictions
+--------------------------
+
+   x    | Actual sin(x) | Predicted | Error
+--------|---------------|-----------|-------
+ -6.283 |         0.000 |     0.965 | 0.965
+ -3.142 |        -0.000 |     0.118 | 0.118
+ -1.571 |        -1.000 |    -0.935 | 0.065
+  0.000 |         0.000 |    -0.010 | 0.010
+  1.571 |         1.000 |     0.928 | 0.072
+  3.142 |         0.000 |     0.002 | 0.002
+  6.283 |        -0.000 |    -0.952 | 0.952
+
+========================================
+  Educational Summary
+========================================
+
+Key Concepts Demonstrated:
+
+1. Regression vs Classification:
+   - Regression: Predict continuous values (sin(x) in [-1, 1])
+   - Classification: Predict discrete classes (like MNIST digits)
+   - Same network architecture, different interpretation!
+
+2. Universal Function Approximation:
+   Neural networks can approximate ANY continuous function!
+   This is a fundamental theorem in neural network theory.
+   We demonstrated this by learning sin(x).
+
+3. Interpolation vs Extrapolation:
+   - Interpolation MAE: 0.0346
+   - Extrapolation MAE: 0.2217
+   Neural networks struggle with extrapolation!
+   They work best within the training data range.
+
+4. Activation Function Choice:
+   We used tanh for all layers because:
+   - Output range [-1, 1] matches sin(x) range
+   - Zero-centered (better for learning)
+
+5. Practical Applications:
+   Function approximation is useful for:
+   - Time series prediction (stock prices, weather)
+   - Physics simulations (approximate complex equations)
+   - Control systems (learn system dynamics)
+
+✓ EXCELLENT: Interpolation MAE < 0.05!
+  The network learned sin(x) very accurately.
+
+Demo completed successfully!
