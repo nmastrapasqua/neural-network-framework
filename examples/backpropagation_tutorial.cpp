@@ -61,7 +61,8 @@ int main() {
 	 Matrix& W3 = l3.getWeights();
 	 Vector& b3 = l3.getBiases();
 
-	 std::cout << "Input e target" << std::endl;
+	 std::cout << std::endl << "Input e target" << std::endl;
+	 std::cout << "-----------------------------" << std::endl;
 	 Vector input{0.5, 0.8};
 	 Vector target{1.0};
 	 input.print("x_input");
@@ -132,10 +133,40 @@ int main() {
 	 std::cout << "-----------------------------" << std::endl;
 	 Vector derivataLoss3 = loss.gradient(a3, target);
 	 derivataLoss3.print("∂L/∂y_pred = ∂L/∂a³");
-	 Vector derivataSigmoid3{sigmoid->derivative(z3[0])};
-	 derivataSigmoid3.print("∂a³/∂z³");
-	 Vector delta3{derivataLoss3[0] * derivataSigmoid3[0]};
+	 std::cout << "Derivata sigmoid: ∂a³/∂z³ = " <<  sigmoid->derivative(z3[0]) << std::endl;
+	 Vector delta3(a3.size());
+	 for (size_t i = 0; i < a3.size(); ++i) {
+		 delta3[i] = derivataLoss3[i] * sigmoid->derivative(z3[0]);
+	 }
 	 delta3.print("δ³ = ∂L/∂z³ = ∂L/∂a³ × ∂a³/∂z³");
+
+	 std::cout << std::endl << "Step 2: Calcolo Gradienti per W³ e b³" << std::endl;
+	 std::cout << "-----------------------------" << std::endl;
+	 Matrix deltaW3(1, 2);
+	 deltaW3(0, 0) = delta3[0]*a2[0];
+	 deltaW3(0, 1) = delta3[0]*a2[1];
+	 //Vector deltaW3{delta3[0]*a2[0], delta3[0]*a2[1]};
+	 deltaW3.print("∂L/∂W³ = δ³ × (a²)ᵀ =  [-0.1123] × [0.8579  0.6997]");
+	 Vector deltaB3{delta3[0]};
+	 deltaB3.print("∂L/∂b³ = δ³");
+
+	 std::cout << std::endl << "Step 3: Calcolo δ² = ∂L/∂z² (Errore Hidden Layer 2)" << std::endl;
+	 std::cout << "-----------------------------" << std::endl;
+	 std::cout << "Nota importante: Non usiamo ∂L/∂W³ per calcolare δ²." << std::endl;
+	 std::cout << "I gradienti dei pesi (∂L/∂W) e i delta (δ) sono due cose diverse:" << std::endl;
+	 std::cout << "\tδ = gradiente rispetto a z (usato per propagare l'errore)" << std::endl;
+	 std::cout << "\t∂L/∂W = gradiente rispetto ai pesi (usato per aggiornare i pesi)" << std::endl;
+	 std::cout << "∂L/∂z² = ∂L/∂z³ × ∂z³/∂a² ⊙ ∂a²/∂z² = δ³ × (W³)ᵀ ⊙ σ'(z²)" << std::endl;
+	 Vector delta2Partial{delta3[0] * W3(0, 0), delta3[0] * W3(0, 1)};
+	 Vector sigDerivZ2{sigmoid->derivative(z2[0]), sigmoid->derivative(z2[1])};
+	 Vector delta2 = delta2Partial.elementWiseMultiply(sigDerivZ2);
+	 std::cout << std::endl;
+	 delta3.print("δ³");
+	 sigDerivZ2.print("σ'(z²)");
+	 W3.print("(W³)ᵀ");
+	 delta2Partial.print("(W³)ᵀ × δ³");
+	 std::cout << std::endl;
+	 delta2.print("δ²");
 
 
 	 return 0;
