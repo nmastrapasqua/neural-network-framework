@@ -145,7 +145,6 @@ int main() {
 	 Matrix deltaW3(1, 2);
 	 deltaW3(0, 0) = delta3[0]*a2[0];
 	 deltaW3(0, 1) = delta3[0]*a2[1];
-	 //Vector deltaW3{delta3[0]*a2[0], delta3[0]*a2[1]};
 	 deltaW3.print("∂L/∂W³ = δ³ × (a²)ᵀ =  [-0.1123] × [0.8579  0.6997]");
 	 Vector deltaB3{delta3[0]};
 	 deltaB3.print("∂L/∂b³ = δ³");
@@ -157,16 +156,90 @@ int main() {
 	 std::cout << "\tδ = gradiente rispetto a z (usato per propagare l'errore)" << std::endl;
 	 std::cout << "\t∂L/∂W = gradiente rispetto ai pesi (usato per aggiornare i pesi)" << std::endl;
 	 std::cout << "∂L/∂z² = ∂L/∂z³ × ∂z³/∂a² ⊙ ∂a²/∂z² = δ³ × (W³)ᵀ ⊙ σ'(z²)" << std::endl;
-	 Vector delta2Partial{delta3[0] * W3(0, 0), delta3[0] * W3(0, 1)};
-	 Vector sigDerivZ2{sigmoid->derivative(z2[0]), sigmoid->derivative(z2[1])};
-	 Vector delta2 = delta2Partial.elementWiseMultiply(sigDerivZ2);
 	 std::cout << std::endl;
+	 Matrix W3t = W3.transpose();
+	 W3t.print("(W³)ᵀ");
+	 Vector W3d3 = W3t * delta3;
+	 W3d3.print("(W³)ᵀ × δ³");
+	 Vector derivateZ2{sigmoid->derivative(z2[0]), sigmoid->derivative(z2[1])};
 	 delta3.print("δ³");
-	 sigDerivZ2.print("σ'(z²)");
-	 W3.print("(W³)ᵀ");
-	 delta2Partial.print("(W³)ᵀ × δ³");
-	 std::cout << std::endl;
+	 derivateZ2.print("σ'(z²)");
+	 Vector delta2 = W3d3.elementWiseMultiply(derivateZ2);
 	 delta2.print("δ²");
+
+	 std::cout << std::endl << "Step 4: Calcolo Gradienti per W² e b²" << std::endl;
+	 std::cout << "-----------------------------" << std::endl;
+	 Matrix deltaW2(2, 3);
+	 deltaW2(0, 0) = delta2[0]*a1[0]; deltaW2(0, 1)= delta2[0]*a1[1]; deltaW2(0, 2) = delta2[0]*a1[2];
+	 deltaW2(1, 0) = delta2[1]*a1[0]; deltaW2(1, 1) = delta2[1]*a1[1]; deltaW2(1, 2) = delta2[1]*a1[2];
+	 deltaW2.print("∂L/∂W² = δ² × (a¹)ᵀ");
+	 Vector deltaB2{delta2[0], delta2[1]};
+	 deltaB2.print("∂L/∂b² = δ²");
+
+	 std::cout << std::endl << "Step 5: Calcolo δ¹ (Errore Hidden Layer 1)" << std::endl;
+	 std::cout << "-----------------------------" << std::endl;
+	 std::cout << "Formula: δ¹ = (W²)ᵀ × δ² ⊙ σ'(z¹)" << std::endl;
+	 Matrix W2t = W2.transpose();
+	 W2t.print("(W²)ᵀ");
+	 Vector W2d2 = W2t * delta2;
+	 W2d2.print("(W²)ᵀ × δ²");
+	 Vector derivateZ1{sigmoid->derivative(z1[0]), sigmoid->derivative(z1[1]), sigmoid->derivative(z1[2])};
+	 derivateZ1.print("σ'(z¹)");
+	 Vector delta1 = W2d2.elementWiseMultiply(derivateZ1);
+	 delta1.print("δ¹");
+
+	 std::cout << std::endl << "Step 6: Calcolo Gradienti per W¹ e b¹" << std::endl;
+	 std::cout << "-----------------------------" << std::endl;
+	 std::cout << "∂L/∂W¹ = δ¹ × (a⁰)ᵀ" << std::endl;
+	 Matrix deltaW1(3, 2);
+	 deltaW1(0, 0) = delta1[0]*input[0]; deltaW1(0, 1) = delta1[0]*input[1];
+	 deltaW1(1, 0) = delta1[1]*input[0]; deltaW1(1, 1) = delta1[1]*input[1];
+	 deltaW1(2, 0) = delta1[2]*input[0]; deltaW1(2, 1) = delta1[2]*input[1];
+	 deltaW1.print("∂L/∂W¹ = δ¹ × (a⁰)ᵀ");
+	 Vector deltaB1{delta1[0], delta1[1], delta1[2]};
+	 deltaB1.print("∂L/∂b¹ = δ¹");
+
+	 std::cout << std::endl << "FASE 3: AGGIORNAMENTO DEI PARAMETRI" << std::endl;
+	 std::cout << "-----------------------------" << std::endl;
+	 std::cout << "Usiamo gradient descent con learning rate η = 0.5" << std::endl;
+	 std::cout << "θ_nuovo = θ_vecchio - η × ∂L/∂θ" << std::endl;
+	 std::cout << std::endl << "Aggiornamento W³ e b³" << std::endl;
+	 double learning_rate = .5;
+	 for (size_t i = 0; i < W3.rows(); ++i) {
+		 for (size_t j = 0; j < W3.cols(); ++j) {
+			 W3(i, j) = W3(i, j) - learning_rate * deltaW3(i, j);
+	     }
+	 }
+	 for (size_t i = 0; i < b3.size(); ++i) {
+		 b3[i] = b3[i] - learning_rate * deltaB3[i];
+	 }
+	 W3.print("W³ nuovo");
+	 b3.print("b³ nuovo");
+
+	 std::cout << std::endl << "Aggiornamento W² e b²" << std::endl;
+	 for (size_t i = 0; i < W2.rows(); ++i) {
+		 for (size_t j = 0; j < W2.cols(); ++j) {
+			 W2(i, j) = W2(i, j) - learning_rate * deltaW2(i, j);
+		 }
+	 }
+	 for (size_t i = 0; i < b2.size(); ++i) {
+		 b2[i] = b2[i] - learning_rate * deltaB2[i];
+	 }
+	 W2.print("W² nuovo");
+	 b2.print("b² nuovo");
+
+	 std::cout << std::endl << "Aggiornamento W¹ e b¹" << std::endl;
+	 for (size_t i = 0; i < W1.rows(); ++i) {
+		 for (size_t j = 0; j < W1.cols(); ++j) {
+			 W1(i, j) = W1(i, j) - learning_rate * deltaW1(i, j);
+		 }
+	 }
+	 for (size_t i = 0; i < b1.size(); ++i) {
+		 b1[i] = b1[i] - learning_rate * deltaB1[i];
+	 }
+	 W1.print("W¹ nuovo");
+	 b1.print("b¹ nuovo");
+
 
 
 	 return 0;
