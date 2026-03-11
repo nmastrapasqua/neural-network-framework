@@ -7,9 +7,15 @@
 
 /*
  * Tutorial Backpropagation: Esempio Completo Passo per Passo
- * Per verificare velocemente i calcoli si può usare questi solver:
- * 	- https://it.symbolab.com/solver/rational-expression-calculator/
- * 	- https://www.mathcelebrity.com/sigmoid-function-calculator.php
+ *
+ * Questo documento spiega la backpropagation con un esempio numerico concreto
+ * che puoi ripetere a mano con una calcolatrice.
+ * Useremo una rete neurale semplice per classificazione binaria.
+ *
+ * Nota sulla precisione: i valori stampati sono arrotondati a 4 decimali per leggibilità.
+ * Quando ripeti i calcoli a mano, potresti ottenere piccole differenze dovute agli arrotondamenti intermedi.
+ * Il framework calcola con precisione `double` (circa 15-17 cifre significative) e quindi è più accurato.
+ * I valori qui riportati sono stati verificati per corrispondere ai risultati del framework.
  */
 void initLayers(Layer& layer_1, Layer& layer_2, Layer& layer_3) {
 	std::cout << "Inizializzazione dei pesi e biases Layer 1" << std::endl;
@@ -115,7 +121,8 @@ int main() {
 	 std::cout << std::endl << "Step 4: Calcolo della Loss" << std::endl;
 	 std::cout << "-----------------------------" << std::endl;
 	 std::cout << "MSE Loss = (y_pred - y_target)² =  (0.7209 - 1.0)² = 0.0779" << std::endl;
-	 std::cout << "L = " << loss.compute(a3, target) << std::endl;
+	 double loss1 = loss.compute(a3, target);
+	 std::cout << "L = " << loss1 << std::endl;
 
 	 std::cout << std::endl << "FASE 2: BACKWARD PROPAGATION" << std::endl;
 	 std::cout << "=============================" << std::endl;
@@ -136,7 +143,7 @@ int main() {
 	 std::cout << "Derivata sigmoid: ∂a³/∂z³ = " <<  sigmoid->derivative(z3[0]) << std::endl;
 	 Vector delta3(a3.size());
 	 for (size_t i = 0; i < a3.size(); ++i) {
-		 delta3[i] = derivataLoss3[i] * sigmoid->derivative(z3[0]);
+		 delta3[i] = derivataLoss3[i] * sigmoid->derivative(z3[i]);
 	 }
 	 delta3.print("δ³ = ∂L/∂z³ = ∂L/∂a³ × ∂a³/∂z³");
 
@@ -240,7 +247,19 @@ int main() {
 	 W1.print("W¹ nuovo");
 	 b1.print("b¹ nuovo");
 
-
+	 std::cout << std::endl << "VERIFICA: FORWARD PASS CON PESI AGGIORNATI" << std::endl;
+	 std::cout << "Ora ripetiamo il forward pass con i nuovi pesi per verificare che la loss sia diminuita" << std::endl;
+	 std::cout << "-----------------------------" << std::endl;
+	 Vector a1New = l1.forward(input);
+	 a1New.print("a¹ nuovo");
+	 Vector a2New = l2.forward(a1New);
+	 a2New.print("a² nuovo");
+	 Vector a3New = l3.forward(a2New);
+	 a3New.print("a³ nuovo = y_pred nuovo");
+	 std::cout << "L = " << loss1 << std::endl;
+	 double lossNew = loss.compute(a3New, target);
+	 std::cout << "L nuovo = " << lossNew << std::endl;
+	 std::cout << "Riduzione: " << (loss1 - lossNew) << " ✓" << std::endl;
 
 	 return 0;
 }

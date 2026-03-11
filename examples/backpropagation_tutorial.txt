@@ -151,8 +151,18 @@ W² nuovo (2x3):
 b² nuovo = [0.1034, 0.2071]  (size: 2)
 
 Aggiornamento W¹ e b¹
-W¹_nuovo (3x2):
+W¹ nuovo (3x2):
 [ 0.1004  0.2007 ]
 [ 0.3005  0.4008 ]
 [ 0.5005  0.6008 ]
-b¹_nuovo = [0.3009, 0.4010, 0.5010]  (size: 3)
+b¹ nuovo = [0.3009, 0.4010, 0.5010]  (size: 3)
+
+VERIFICA: FORWARD PASS CON PESI AGGIORNATI
+Ora ripetiamo il forward pass con i nuovi pesi per verificare che la loss sia diminuita
+-----------------------------
+a¹ nuovo = [0.6252, 0.7051, 0.7742]  (size: 3)
+a² nuovo = [0.8590, 0.7035]  (size: 2)
+a³ nuovo = y_pred nuovo = [0.7459]  (size: 1)
+L = 0.0779
+L nuovo = 0.0646
+Riduzione: 0.0133 ✓
