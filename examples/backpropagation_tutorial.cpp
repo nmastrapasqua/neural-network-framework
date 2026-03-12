@@ -261,6 +261,31 @@ int main() {
 	 std::cout << "L nuovo = " << lossNew << std::endl;
 	 std::cout << "Riduzione: " << (loss1 - lossNew) << " ✓" << std::endl;
 
+	 std::cout << std::endl << "CONCLUSIONE: RIPETIAMO L'ESEMPIO CON LA RETE" << std::endl;
+	 std::cout << "-----------------------------" << std::endl;
+
+	 Network network;
+	 network.addLayer(2, 3, sigmoid);
+	 network.addLayer(3, 2, sigmoid);
+	 network.addLayer(2, 1, sigmoid);
+	 initLayers(network.getLayer(0), network.getLayer(1), network.getLayer(2));
+
+	 std::cout << std::endl << "Training..." << std::endl;
+	 std::vector<double> loss_history = network.train(
+	         inputs,
+	         targets,
+	         2,
+	         .5,
+	         loss,
+	         1);
+
+	 for (size_t i = 0; i < loss_history.size(); ++i) {
+		 std::cout << "Epoch " << (i + 1) << ": loss = " << loss_history[i] << std::endl;
+	 }
+
+	 std::cout << "Riduzione: " << (loss_history[0] - loss_history[1]) << " ✓" << std::endl;
+
+
 	 return 0;
 }
 
