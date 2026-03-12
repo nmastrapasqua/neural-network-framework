@@ -1,0 +1,409 @@
+========================================
+  MNIST Digit Recognition Demo
+========================================
+
+Step 1: Loading MNIST dataset
+------------------------------
+Loading training images...
+Loading training labels...
+Loading test images...
+Loading test labels...
+
+Dataset loaded successfully!
+  - Training images: 60000
+  - Training labels: 60000
+  - Test images: 10000
+  - Test labels: 10000
+  - Image dimensions: 28x28 = 784 pixels
+  - Number of classes: 10 (digits 0-9)
+
+Step 2: Creating training subset
+---------------------------------
+Using subset of 10000 training images for faster training
+
+Step 3: Displaying sample images
+---------------------------------
+Here are a few examples from the training set:
+
+Training example 1:
+Label: 5
++----------------------------+
+|                            |
+|                            |
+|                            |
+|                            |
+|                            |
+|                ==* +@%=    |
+|        ..-+*%%%%%#*%%*:    |
+|       .%%%%%%%%%%-::..     |
+|        #%%%%%**%%          |
+|        :+-%%#  .+          |
+|           +%-              |
+|           =%*              |
+|            *%:             |
+|            .%#+-           |
+|             :%%%=          |
+|              .*%%+         |
+|                -%%*        |
+|                 %%%:       |
+|              .=*%%#        |
+|            .+%%%%%*        |
+|           =#%%%%#:         |
+|         :#%%%%*:           |
+|       *#%%%%*:             |
+|    .*#%%%%%=               |
+|    =%%%#==                 |
+|                            |
+|                            |
+|                            |
++----------------------------+
+
+Training example 2:
+Label: 0
++----------------------------+
+|                            |
+|                            |
+|                            |
+|                            |
+|               .+%+.        |
+|              .%%%%%        |
+|             .%%%%%%:       |
+|            :#%%%#:%%=      |
+|           +%%%%%%-*%+      |
+|          .%%%*=%%.:@+      |
+|         .%%%* :=   %%.     |
+|        .+%%#:      %%+     |
+|        *%%:        %%*     |
+|       :%%:         %%*     |
+|       *%*          @%*     |
+|      :%%-          %%+     |
+|      -%%          =%*      |
+|      -%#         =%#:      |
+|      -%+       .+%*        |
+|      -%#      =%%+         |
+|      -%%+..-*#%#+.         |
+|      -%%%%#%%%*=           |
+|       #%%%%%%+             |
+|        =%%%=.              |
+|                            |
+|                            |
+|                            |
+|                            |
++----------------------------+
+
+Training example 3:
+Label: 4
++----------------------------+
+|                            |
+|                            |
+|                            |
+|                            |
+|                            |
+|                    :%.     |
+|    ::              =*.     |
+|    =+              +#.     |
+|    #+              %+      |
+|    #+             *%=      |
+|   .%+             *%.      |
+|   =%+             %%.      |
+|   +%=            +%#       |
+|   +%:          -*%%-       |
+|   +%-   ..=++%%%*%%.       |
+|   +%%###%%%%*+-  %%        |
+|    =*****-.     -%#        |
+|                 +%=        |
+|                 +%:        |
+|                 +%:        |
+|                 +@-        |
+|                 +%-        |
+|                 +%+        |
+|                 +@+        |
+|                 -%+        |
+|                            |
+|                            |
+|                            |
++----------------------------+
+
+Step 4: Creating network architecture
+--------------------------------------
+Network architecture: [784, 128, 64, 10]
+  - Input layer: 784 neurons (28x28 pixels)
+  - Hidden layer 1: 128 neurons (ReLU activation)
+  - Hidden layer 2: 64 neurons (ReLU activation)
+  - Output layer: 10 neurons (sigmoid activation)
+
+Step 5: Initializing weights
+-----------------------------
+Weights initialized:
+  - Hidden layers: He initialization (optimized for ReLU)
+  - Output layer: Xavier initialization (optimized for sigmoid)
+  - Random seed: 42 (for reproducibility)
+
+Step 6: Configuring training parameters
+----------------------------------------
+Training configuration:
+  - Epochs: 10
+  - Learning rate: 0.01
+  - Loss function: Mean Squared Error (MSE)
+  - Optimization: Stochastic Gradient Descent (SGD)
+  - Training samples: 10000
+  - Test samples: 10000
+
+Step 7: Training the network
+----------------------------
+Training in progress (this may take a few minutes)...
+
+Epoch | Train Loss | Train Acc | Test Acc  | Time (s)
+------|------------|-----------|-----------|----------
+    1 | 0.079912 | 70.39%   | 69.29%    | 96
+    2 | 0.042145 | 84.78%   | 84.24%    | 100
+    3 | 0.028826 | 88.00%   | 87.37%    | 100
+    4 | 0.022804 | 89.47%   | 88.56%    | 163
+    5 | 0.019619 | 90.39%   | 89.49%    | 148
+    6 | 0.017604 | 90.88%   | 90.12%    | 158
+    7 | 0.016162 | 91.34%   | 90.59%    | 172
+    8 | 0.015067 | 91.98%   | 90.83%    | 178
+    9 | 0.014191 | 92.38%   | 91.12%    | 164
+   10 | 0.013454 | 92.70%   | 91.36%    | 155
+
+Training completed in 1437 seconds
+
+Step 8: Final evaluation on test set
+--------------------------------------
+Final test set performance:
+  - Test accuracy: 91.36%
+  - Test loss: 0.015307
+
+Step 9: Sample predictions with visualizations
+-----------------------------------------------
+Here are some predictions on test images:
+
+Test example 1:
+Actual label: 7
+Predicted label: 7 ✓ CORRECT
+
+Output probabilities:
+  0: 0.018, 1: 0.000, 2: 0.017, 3: 0.039, 4: 0.000, 5: 0.009, 6: 0.000, 7: 0.985, 8: 0.004, 9: 0.004
+
++----------------------------+
+|                            |
+|                            |
+|                            |
+|                            |
+|                            |
+|                            |
+|                            |
+|      :*++:.                |
+|      #%%%%%*********.      |
+|      :=:=+%%#%%%%%%%=      |
+|            : :::: %%-      |
+|                  :%#       |
+|                  %@:       |
+|                 =%%.       |
+|                :%%:        |
+|                =%*         |
+|                #%:         |
+|               =%*          |
+|              :%%:          |
+|              #%+           |
+|             #%#.           |
+|            .%%:            |
+|           .#%=             |
+|           =%%.             |
+|          :%%%.             |
+|          =%%#.             |
+|          =%#               |
+|                            |
++----------------------------+
+
+Test example 2:
+Actual label: 2
+Predicted label: 2 ✓ CORRECT
+
+Output probabilities:
+  0: 0.072, 1: 0.000, 2: 0.879, 3: 0.014, 4: 0.000, 5: 0.007, 6: 0.133, 7: 0.000, 8: 0.008, 9: 0.000
+
++----------------------------+
+|                            |
+|                            |
+|                            |
+|          ==*@@+-           |
+|         +%%%%%%#.          |
+|        +%%%#+*%%=          |
+|       .%%#.   #%=          |
+|       :%#    =%%:          |
+|        .     #%%:          |
+|             =%%*           |
+|            :%%%:           |
+|            =%%+            |
+|           *%%+             |
+|           %%%.             |
+|          *%%=              |
+|         :%%*               |
+|         #%%=               |
+|        =%%*                |
+|        %%%                 |
+|        %%%.         .++++  |
+|        %%%%%%%%+++%%%%%%%= |
+|        *%%%%%%%%%%%%%%+==: |
+|         ====+%%%+==.       |
+|                            |
+|                            |
+|                            |
+|                            |
+|                            |
++----------------------------+
+
+Test example 3:
+Actual label: 1
+Predicted label: 1 ✓ CORRECT
+
+Output probabilities:
+  0: 0.001, 1: 0.951, 2: 0.043, 3: 0.029, 4: 0.005, 5: 0.022, 6: 0.017, 7: 0.024, 8: 0.018, 9: 0.006
+
++----------------------------+
+|                            |
+|                            |
+|                            |
+|                            |
+|                .%-         |
+|                -%:         |
+|                =%          |
+|               .%+          |
+|               :%:          |
+|               ##           |
+|              .%#           |
+|              -%*           |
+|              =%:           |
+|             :%#            |
+|             =@+            |
+|             *%:            |
+|             %#             |
+|            =%+             |
+|            +%+             |
+|            %%:             |
+|           :%%:             |
+|           =%#              |
+|           #%=              |
+|           **               |
+|                            |
+|                            |
+|                            |
+|                            |
++----------------------------+
+
+Test example 4:
+Actual label: 0
+Predicted label: 0 ✓ CORRECT
+
+Output probabilities:
+  0: 0.985, 1: 0.000, 2: 0.001, 3: 0.000, 4: 0.000, 5: 0.002, 6: 0.001, 7: 0.001, 8: 0.001, 9: 0.000
+
++----------------------------+
+|                            |
+|                            |
+|                            |
+|                            |
+|             +%#.           |
+|            .%%%-           |
+|            *%%%-           |
+|          -*%%%%+-:         |
+|          %%%%%%%%#.        |
+|         *@%%%%%#%%%        |
+|        :#%%%%+::=%%-       |
+|       .%%%%#=   .%%%-      |
+|       .%%%*      -%%%.     |
+|       .%%#.      .#%%.     |
+|       .%%        .#@%+     |
+|       =%%        -%%%.     |
+|       #%%       :%%%%.     |
+|       #%%      +%%%#:      |
+|       #%%     *#%%%*       |
+|       #%%::%%%@%%%%        |
+|       -%%%%%%%%%%%+        |
+|       .%%%%%%%%%*.         |
+|        :+%%%%%%-           |
+|          :*%*::.           |
+|                            |
+|                            |
+|                            |
+|                            |
++----------------------------+
+
+Test example 5:
+Actual label: 4
+Predicted label: 4 ✓ CORRECT
+
+Output probabilities:
+  0: 0.014, 1: 0.000, 2: 0.032, 3: 0.000, 4: 0.954, 5: 0.002, 6: 0.016, 7: 0.015, 8: 0.071, 9: 0.071
+
++----------------------------+
+|                            |
+|                            |
+|                            |
+|                            |
+|                            |
+|          .#       :.       |
+|          =%       ++       |
+|          *%       -#       |
+|         :%=       =%       |
+|        .%#        *%       |
+|        +%.        @%       |
+|       :%#        =%*       |
+|       +%-       .%%:       |
+|       #%        =%#        |
+|       %+        +%+        |
+|       ##        %%-        |
+|       +%#----=+*%%-        |
+|       .*%%%%%%%%%%         |
+|         .::::  +%%         |
+|                =%%.        |
+|                =%%         |
+|                =%%         |
+|                =%%         |
+|                %%-         |
+|                *:          |
+|                            |
+|                            |
+|                            |
++----------------------------+
+
+========================================
+  Educational Summary
+========================================
+
+Key Concepts Demonstrated:
+
+1. Multi-Class Classification:
+   MNIST is a 10-class classification problem (digits 0-9).
+   The network outputs 10 values, one for each class.
+   The predicted class is the one with the highest output value.
+
+2. Deep Neural Network:
+   This network has 2 hidden layers, making it a 'deep' network.
+   Multiple hidden layers allow the network to learn hierarchical features:
+   - First layer: learns simple edges and curves
+   - Second layer: combines edges into more complex shapes
+   - Output layer: combines shapes to recognize digits
+
+3. ReLU Activation:
+   ReLU (Rectified Linear Unit) is used in hidden layers because:
+   - It helps prevent vanishing gradient problem in deep networks
+   - It's computationally efficient (just max(0, x))
+   - It often leads to faster training convergence
+
+4. Weight Initialization:
+   Different activation functions require different initialization strategies:
+   - He initialization for ReLU layers (accounts for ReLU's properties)
+   - Xavier initialization for sigmoid layers (balanced variance)
+
+5. Training on Real Data:
+   Unlike XOR (4 examples), MNIST has thousands of examples.
+   This demonstrates how neural networks scale to real-world problems.
+   More data generally leads to better generalization.
+
+✓ SUCCESS: The network achieved 91.4% accuracy!
+  This exceeds the target of 85% accuracy on the test set.
+  The network has successfully learned to recognize handwritten digits.
+
+Demo completed successfully!
