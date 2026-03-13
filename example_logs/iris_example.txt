@@ -1,0 +1,155 @@
+========================================
+  Iris Dataset Classification Demo
+========================================
+
+Step 1: Loading Iris dataset
+----------------------------
+Dataset loaded successfully!
+  - Total samples: 150
+  - Features per sample: 4
+  - Classes: 3
+    0: Iris-setosa
+    1: Iris-versicolor
+    2: Iris-virginica
+
+Step 2: Preprocessing data
+--------------------------
+Sample before normalization:
+  Features: [5.1, 3.5, 1.4, 0.2]
+Sample after normalization:
+  Features: [0.222, 0.625, 0.068, 0.042]
+
+Shuffling dataset with seed=123...
+
+Step 3: Splitting into train/test sets
+---------------------------------------
+Split ratio: 80.000% train, 20.000% test
+  - Training samples: 120
+  - Test samples: 30
+
+Step 4: Creating neural network
+--------------------------------
+Network architecture: [4, 6, 3]
+  - Input layer: 4 neurons (flower measurements)
+  - Hidden layer: 6 neurons (tanh activation)
+  - Output layer: 3 neurons (sigmoid activation, one per class)
+
+Step 5: Initializing weights
+-----------------------------
+Weights initialized with Xavier initialization
+Random seed: 123 (for reproducibility)
+
+Step 6: Training the network
+----------------------------
+Training configuration:
+  - Epochs: 300
+  - Learning rate: 0.150
+  - Loss function: MSE
+  - Batch size: 1 (SGD)
+
+Training progress (every 100 epochs):
+Epoch | Train Loss | Train Acc | Test Acc
+------|------------|-----------|----------
+    1 | 0.215947 | 60.83%   | 66.67%
+  100 | 0.019807 | 96.67%   | 100.00%
+  200 | 0.016566 | 96.67%   | 100.00%
+  300 | 0.015657 | 97.50%   | 100.00%
+
+Step 7: Final evaluation
+------------------------
+Final performance:
+  - Training accuracy: 97.50%
+  - Test accuracy: 100.00%
+  - Test loss: 0.000894
+
+Step 8: Sample predictions on test set
+---------------------------------------
+Showing first 10 test predictions:
+
+Sample 1:
+  Actual: Iris-versicolor
+  Predicted: Iris-versicolor ✓
+  Probabilities: [0.017, 0.994, 0.001]
+
+Sample 2:
+  Actual: Iris-versicolor
+  Predicted: Iris-versicolor ✓
+  Probabilities: [0.005, 0.911, 0.055]
+
+Sample 3:
+  Actual: Iris-versicolor
+  Predicted: Iris-versicolor ✓
+  Probabilities: [0.005, 0.953, 0.029]
+
+Sample 4:
+  Actual: Iris-versicolor
+  Predicted: Iris-versicolor ✓
+  Probabilities: [0.009, 0.987, 0.005]
+
+Sample 5:
+  Actual: Iris-setosa
+  Predicted: Iris-setosa ✓
+  Probabilities: [0.996, 0.007, 0.000]
+
+Sample 6:
+  Actual: Iris-virginica
+  Predicted: Iris-virginica ✓
+  Probabilities: [0.001, 0.041, 0.969]
+
+Sample 7:
+  Actual: Iris-virginica
+  Predicted: Iris-virginica ✓
+  Probabilities: [0.001, 0.023, 0.986]
+
+Sample 8:
+  Actual: Iris-virginica
+  Predicted: Iris-virginica ✓
+  Probabilities: [0.001, 0.023, 0.986]
+
+Sample 9:
+  Actual: Iris-setosa
+  Predicted: Iris-setosa ✓
+  Probabilities: [0.993, 0.013, 0.000]
+
+Sample 10:
+  Actual: Iris-setosa
+  Predicted: Iris-setosa ✓
+  Probabilities: [0.991, 0.017, 0.000]
+
+Accuracy on shown samples: 10/10 = 100.0%
+
+========================================
+  Educational Summary
+========================================
+
+Key Concepts Demonstrated:
+
+1. Tabular Data Classification:
+   Neural networks work on any type of data, not just images.
+   Iris has 4 numerical features (flower measurements).
+
+2. Feature Normalization:
+   We normalized features to [0, 1] range before training.
+   This is crucial for neural networks to train effectively.
+   Without normalization, features with larger values dominate.
+
+3. Small Dataset Challenges:
+   Iris has only 150 samples (120 train, 30 test).
+   Small datasets are prone to overfitting.
+   We use a simple architecture (6 hidden neurons) to avoid this.
+   Fewer neurons = less capacity to memorize = better generalization.
+
+4. Multi-Class Classification:
+   3 output neurons, one per class (one-hot encoding).
+   Predicted class = neuron with highest activation.
+
+5. Classical ML Dataset:
+   Iris is a benchmark dataset from 1936!
+   It's often used to compare different ML algorithms.
+   Neural networks are actually overkill for Iris,
+   but it's great for learning and demonstration.
+
+✓ EXCELLENT: 100.0% test accuracy!
+  The network successfully learned to classify iris flowers.
+
+Demo completed successfully!

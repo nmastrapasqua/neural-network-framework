@@ -139,6 +139,10 @@ run_iris: $(BIN_DIR)/iris_example
 run_sin: $(BIN_DIR)/sin_regression_example
 	@echo "Running sin(x) regression example..."
 	@$(BIN_DIR)/sin_regression_example
+	
+run_backprop_tutorial: $(BIN_DIR)/backpropagation_tutorial
+	@echo "Running backpropagation tutorial..."
+	@$(BIN_DIR)/backpropagation_tutorial
 
 # Run all examples
 run_all: run_xor run_binary run_save_load run_mnist run_iris run_sin
