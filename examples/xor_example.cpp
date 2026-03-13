@@ -155,7 +155,8 @@ int main() {
     MeanSquaredError loss_function;
 
     // Create training monitor to track progress
-    TrainingMonitor monitor;
+    // Print progress every 1000 epochs for cleaner output
+    TrainingMonitor monitor(1000);
 
     // ============================================================================
     // STEP 5: Train the network

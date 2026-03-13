@@ -13,6 +13,12 @@
  */
 class TrainingMonitor {
 public:
+	/**
+	 * Constructor
+	 * @param print_interval Print progress every N epochs (default: 1 = every epoch)
+	 */
+	explicit TrainingMonitor(size_t print_interval = 1);
+
     /**
      * Record metrics for a completed epoch
      * @param epoch The epoch number (0-indexed)
@@ -49,6 +55,7 @@ public:
 private:
     std::vector<double> loss_history_;
     std::vector<double> accuracy_history_;
+    size_t print_interval_;
 };
 
 #endif // TRAINING_MONITOR_H

@@ -3,6 +3,10 @@
 #include <iomanip>
 #include <numeric>
 
+TrainingMonitor::TrainingMonitor(size_t print_interval)
+    : print_interval_(print_interval) {
+}
+
 void TrainingMonitor::recordEpoch(size_t /* epoch */, double loss, double accuracy) {
     loss_history_.push_back(loss);
     accuracy_history_.push_back(accuracy);
@@ -11,6 +15,15 @@ void TrainingMonitor::recordEpoch(size_t /* epoch */, double loss, double accura
 void TrainingMonitor::printProgress(size_t epoch, size_t total_epochs) const {
     if (loss_history_.empty()) {
         return;
+    }
+
+    // Only print at specified intervals, first epoch, and last epoch
+    bool should_print = (epoch == 0) ||
+                       ((epoch + 1) % print_interval_ == 0) ||
+                       (epoch + 1 == total_epochs);
+
+    if (!should_print) {
+    	return;
     }
 
     // Get the most recent metrics
