@@ -109,12 +109,13 @@ Il framework include diversi esempi educativi che dimostrano vari aspetti delle 
 make run_all
 
 # Oppure esegui esempi individuali
-make run_xor          # Problema XOR (non linearmente separabile)
-make run_binary       # Classificazione binaria lineare
-make run_save_load    # Serializzazione modelli
-make run_mnist        # Riconoscimento cifre MNIST
-make run_iris         # Classificazione Iris dataset
-make run_sin          # Regressione funzione sin(x)
+make run_xor                # Problema XOR (non linearmente separabile)
+make run_binary             # Classificazione binaria lineare
+make run_save_load          # Serializzazione modelli
+make run_mnist              # Riconoscimento cifre MNIST
+make run_iris               # Classificazione Iris dataset
+make run_sin                # Regressione funzione sin(x)
+make run_backprop_tutorial  # Tutorial dettagliato backpropagation
 ```
 
 ### 1. XOR Problem (`examples/xor_example.cpp`)
@@ -217,6 +218,33 @@ Approssimazione della funzione sin(x) - dimostra regressione (output continuo).
 make run_sin
 ```
 
+### 7. Backpropagation Tutorial (`examples/backpropagation_tutorial.cpp`)
+
+Esempio educativo dettagliato che mostra passo-passo il funzionamento della backpropagation.
+
+**Caratteristiche:**
+- Implementazione manuale di ogni step della backpropagation
+- Stampa dettagliata di tutte le formule matematiche
+- Calcolo esplicito di δ (delta), gradienti dei pesi e bias
+- Verifica che la loss diminuisca dopo l'aggiornamento
+- Architettura: [2, 3, 2, 1] con sigmoid
+- Output salvato in `example_logs/backpropagation_tutorial.txt`
+- Perfetto per capire in dettaglio come funziona l'algoritmo
+
+**Concetti dimostrati:**
+- Forward propagation con calcoli intermedi
+- Backward propagation con chain rule
+- Calcolo dei gradienti (∂L/∂W, ∂L/∂b)
+- Differenza tra δ (delta) e ∂L/∂W (gradienti dei pesi)
+- Aggiornamento parametri con gradient descent
+- Verifica della convergenza
+
+```bash
+make run_backprop_tutorial
+```
+
+**Nota**: Questo esempio è particolarmente utile per chi vuole comprendere a fondo la matematica dietro le reti neurali.
+
 ## 🧪 Testing
 
 Il framework include due tipi di test:
@@ -293,7 +321,11 @@ examples/
 ├── save_load_example.cpp
 ├── mnist_example.cpp
 ├── iris_example.cpp
-└── sin_regression_example.cpp
+├── sin_regression_example.cpp
+└── backpropagation_tutorial.cpp
+
+example_logs/
+└── backpropagation_tutorial.txt  # Output dettagliato del tutorial
 
 tests/
 ├── test_*.cpp         # Unit test
@@ -743,6 +775,17 @@ for (size_t epoch = 0; epoch < epochs; ++epoch) {
 ## 📄 Licenza
 
 Questo progetto è rilasciato per scopi educativi. Sentiti libero di usarlo, modificarlo e imparare da esso.
+
+## 🤖 Sviluppo con Supporto AI
+
+Questo progetto è stato sviluppato con il supporto di **Kiro AI Assistant**, che ha contribuito a:
+- Design dell'architettura e delle API
+- Implementazione dei componenti core
+- Creazione di test completi (unit e property-based)
+- Documentazione dettagliata e esempi educativi
+- Debugging e ottimizzazione del codice
+
+L'approccio collaborativo uomo-AI ha permesso di creare un framework educativo di alta qualità, con particolare attenzione alla chiarezza del codice e alla correttezza matematica.
 
 ## 🤝 Contributi
 
