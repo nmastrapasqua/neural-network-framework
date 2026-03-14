@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cstddef>
+#include <random>
 #include "vector.h"
 
 class Matrix {
@@ -29,7 +30,14 @@ public:
     void randomize(double min, double max);
     void print(const char* name = nullptr) const;  // Print matrix to console
 
+    // Random seed management for reproducibility
+    static void setSeed(unsigned int seed);
+
 private:
+    static std::mt19937& getGenerator();
+    static bool seed_set_;
+    static unsigned int seed_value_;
+
     std::vector<double> data_;  // Row-major order storage
     size_t rows_;
     size_t cols_;

@@ -178,7 +178,7 @@ int main() {
     std::cout << "-----------------------------" << std::endl;
 
     // Set a fixed random seed for reproducibility
-    std::srand(42);
+    Matrix::setSeed(42);
 
     // Initialize weights using He initialization for ReLU layers
     // He initialization: weights ~ Uniform(-√(2/fan_in), √(2/fan_in))

@@ -279,7 +279,7 @@ int main() {
     std::cout << "Step 4: Initializing weights" << std::endl;
     std::cout << "-----------------------------" << std::endl;
 
-    std::srand(42);
+    Matrix::setSeed(42);
     network.getLayer(0).initializeXavier(1, 16);
     network.getLayer(1).initializeXavier(16, 16);
     network.getLayer(2).initializeXavier(16, 1);

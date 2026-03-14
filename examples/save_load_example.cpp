@@ -77,7 +77,7 @@ int main() {
     original_network.addLayer(4, 1, sigmoid);
 
     // Initialize weights with fixed seed for reproducibility
-    std::srand(42);
+    Matrix::setSeed(42);
     original_network.getLayer(0).initializeXavier(2, 4);
     original_network.getLayer(1).initializeXavier(4, 1);
 

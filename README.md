@@ -399,7 +399,7 @@ int main() {
     network.addLayer(4, 1, sigmoid);
     
     // Inizializza pesi
-    std::srand(42);
+    Matrix::setSeed(42);
     network.getLayer(0).initializeXavier(2, 4);
     network.getLayer(1).initializeXavier(4, 1);
     

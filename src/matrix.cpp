@@ -146,13 +146,38 @@ void Matrix::randomize(double min, double max) {
         );
     }
 
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
     std::uniform_real_distribution<double> dist(min, max);
+    std::mt19937& gen = getGenerator();
 
     for (double& value : data_) {
         value = dist(gen);
     }
+}
+
+// Static member initialization
+bool Matrix::seed_set_ = false;
+unsigned int Matrix::seed_value_ = 0;
+
+/**
+ * Set the random seed for weight initialization.
+ * Call this before initializeXavier/initializeHe/randomize for reproducible results.
+ *
+ * @param seed The seed value for the random number generator
+ */
+void Matrix::setSeed(unsigned int seed) {
+    seed_set_ = true;
+    seed_value_ = seed;
+    // Reset the generator with the new seed
+    getGenerator().seed(seed);
+}
+
+/**
+ * Get the internal random number generator.
+ * If setSeed() was called, uses that seed. Otherwise uses std::random_device.
+ */
+std::mt19937& Matrix::getGenerator() {
+    static std::mt19937 gen(std::random_device{}());
+    return gen;
 }
 
 void Matrix::print(const char* name) const {

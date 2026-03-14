@@ -73,7 +73,7 @@ RC_GTEST_PROP(XORPropertyTest, XORNotLinearlySeparable, ()) {
 
     // Initialize weights
     unsigned int seed = *rc::gen::inRange(1u, 1000u);
-    std::srand(seed);
+    Matrix::setSeed(seed);
     network.getLayer(0).initializeXavier(2, 1);
 
     // Training parameters - fewer epochs since we expect it to fail
@@ -140,7 +140,7 @@ TEST(XORPropertyTest, XORSolvableWithDifferentHiddenSizes) {
         network.addLayer(hidden_size, 1, sigmoid);
 
         // Initialize weights with the specific seed for this configuration
-        std::srand(seed);
+        Matrix::setSeed(seed);
         network.getLayer(0).initializeXavier(2, hidden_size);
         network.getLayer(1).initializeXavier(hidden_size, 1);
 

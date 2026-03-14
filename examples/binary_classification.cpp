@@ -198,7 +198,7 @@ int main() {
     std::cout << "-----------------------------" << std::endl;
 
     // Set a fixed random seed to ensure reproducible results
-    std::srand(42);
+    Matrix::setSeed(42);
 
     // Initialize weights using Xavier initialization
     // Xavier initialization is appropriate for tanh activation

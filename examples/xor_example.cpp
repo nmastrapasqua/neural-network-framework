@@ -118,7 +118,7 @@ int main() {
 
     // Set a fixed random seed to ensure reproducible results
     // This is important for educational purposes and debugging
-    std::srand(42);
+    Matrix::setSeed(42);
 
     // Initialize weights using Xavier initialization
     // Xavier initialization: weights ~ Uniform(-√(6/(fan_in + fan_out)), √(6/(fan_in + fan_out)))

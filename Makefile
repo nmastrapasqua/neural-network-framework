@@ -140,12 +140,12 @@ run_sin: $(BIN_DIR)/sin_regression_example
 	@echo "Running sin(x) regression example..."
 	@$(BIN_DIR)/sin_regression_example
 	
-run_backprop_tutorial: $(BIN_DIR)/backpropagation_tutorial
+run_tutorial: $(BIN_DIR)/backpropagation_tutorial
 	@echo "Running backpropagation tutorial..."
 	@$(BIN_DIR)/backpropagation_tutorial
 
 # Run all examples
-run_all: run_xor run_binary run_save_load run_mnist run_iris run_sin
+run_all: run_xor run_binary run_save_load run_mnist run_iris run_sin run_tutorial
 
 # Run tests
 test: tests
@@ -241,6 +241,7 @@ help:
 	@echo "  run_mnist    : Run MNIST example"
 	@echo "  run_iris     : Run Iris classification example"
 	@echo "  run_sin      : Run sin(x) regression example"
+	@echo "  run_tutorial : Run backpropagation tutorial"
 	@echo "  run_all      : Run all examples"
 	@echo ""
 	@echo "Utility Targets:"
