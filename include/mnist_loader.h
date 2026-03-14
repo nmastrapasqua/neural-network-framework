@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <cstdint>
 #include <iostream>
-#include "../include/vector.h"
+#include "vector.h"
 
 /**
  * MNISTLoader - Utility class for loading and processing MNIST dataset

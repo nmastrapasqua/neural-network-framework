@@ -3,9 +3,9 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
-#include "../include/network.h"
-#include "../include/serializer.h"
-#include "../include/activation.h"
+#include "network.h"
+#include "serializer.h"
+#include "activation.h"
 
 // Helper function to compare doubles with tolerance
 bool approxEqual(double a, double b, double epsilon = 1e-9) {
