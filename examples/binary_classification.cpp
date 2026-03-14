@@ -233,7 +233,7 @@ int main() {
     MeanSquaredError loss_function;
 
     // Create training monitor to track progress
-    TrainingMonitor monitor;
+    TrainingMonitor monitor(100);
 
     // ============================================================================
     // STEP 6: Train the network

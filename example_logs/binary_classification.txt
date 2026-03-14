@@ -1,0 +1,127 @@
+========================================
+  Binary Classification - Neural Network Demo
+========================================
+
+Step 1: Generating linearly separable dataset
+----------------------------------------------
+Generated 200 samples
+Decision boundary: y = 0.5 * x + 0.3
+  - Points above the line: class 1 (target = 1.0)
+  - Points below the line: class 0 (target = -1.0)
+Note: Using -1 and 1 as targets to match tanh output range
+
+Step 2: Splitting dataset
+-------------------------
+Training set: 160 samples
+Test set: 40 samples
+
+Step 3: Creating network architecture
+--------------------------------------
+Network architecture: [2, 3, 1]
+  - Input layer: 2 neurons (x, y coordinates)
+  - Hidden layer: 3 neurons (tanh activation)
+  - Output layer: 1 neuron (tanh activation)
+
+Step 4: Initializing weights
+-----------------------------
+Weights initialized with Xavier initialization (seed = 42)
+Xavier initialization is optimal for tanh activation
+
+Step 5: Configuring training parameters
+----------------------------------------
+Training configuration:
+  - Epochs: 1000
+  - Learning rate: 0.1
+  - Loss function: Mean Squared Error (MSE)
+  - Optimization: Stochastic Gradient Descent (SGD)
+  - Progress interval: every 100 epochs
+
+Step 6: Training the network
+----------------------------
+Training in progress...
+
+Epoch    1/1000 [0.1%] - Loss: 0.298099 - Accuracy: 100.0000%
+Epoch  100/1000 [10.0%] - Loss: 0.001691 - Accuracy: 100.0000%
+Epoch  200/1000 [20.0%] - Loss: 0.000289 - Accuracy: 100.0000%
+Epoch  300/1000 [30.0%] - Loss: 0.000153 - Accuracy: 100.0000%
+Epoch  400/1000 [40.0%] - Loss: 0.000104 - Accuracy: 100.0000%
+Epoch  500/1000 [50.0%] - Loss: 0.000078 - Accuracy: 100.0000%
+Epoch  600/1000 [60.0%] - Loss: 0.000063 - Accuracy: 100.0000%
+Epoch  700/1000 [70.0%] - Loss: 0.000052 - Accuracy: 100.0000%
+Epoch  800/1000 [80.0%] - Loss: 0.000044 - Accuracy: 100.0000%
+Epoch  900/1000 [90.0%] - Loss: 0.000039 - Accuracy: 100.0000%
+Epoch 1000/1000 [100.0%] - Loss: 0.000034 - Accuracy: 100.0000%
+Epoch | Average Loss
+------|-------------
+    0 | 0.298099
+  100 | 0.001622
+  200 | 0.000286
+  300 | 0.000153
+  400 | 0.000103
+  500 | 0.000078
+  600 | 0.000062
+  700 | 0.000052
+  800 | 0.000044
+  900 | 0.000039
+ 1000 | 0.000034
+
+Step 7: Evaluating on training set
+-----------------------------------
+Training accuracy: 160/160 = 100.0%
+
+Step 8: Evaluating on test set
+-------------------------------
+Test accuracy: 40/40 = 100.0%
+
+Step 9: Example predictions on test set
+----------------------------------------
+   X    |   Y    | Target | Prediction | Correct?
+--------|--------|--------|------------|----------
+ -0.812 | -0.634 | -1.000 |     -1.000 | ✓
+  0.869 |  0.277 | -1.000 |     -1.000 | ✓
+  0.033 |  0.314 | -1.000 |     -0.011 | ✓
+ -0.129 |  0.460 |  1.000 |      1.000 | ✓
+ -0.905 |  0.132 |  1.000 |      1.000 | ✓
+ -0.683 | -0.760 | -1.000 |     -1.000 | ✓
+ -0.316 | -0.816 | -1.000 |     -1.000 | ✓
+ -0.812 | -0.377 | -1.000 |     -1.000 | ✓
+  0.959 | -0.649 | -1.000 |     -1.000 | ✓
+ -0.966 |  0.527 |  1.000 |      1.000 | ✓
+
+Step 10: Final results
+----------------------
+Training accuracy: 100.0%
+Test accuracy: 100.0%
+Final training loss: 0.000034
+
+========================================
+  Educational Summary
+========================================
+
+Key Concepts Demonstrated:
+1. Linear Separability:
+   This problem is linearly separable, meaning a straight line
+   can perfectly separate the two classes. Even a simple network
+   can learn this pattern easily.
+
+2. Train/Test Split:
+   We split the data into training (80.000000%) and test (20.000000%) sets.
+   This allows us to evaluate how well the network generalizes to
+   unseen data, not just memorize the training examples.
+
+3. Tanh Activation:
+   Tanh outputs values in range (-1, 1), which is zero-centered.
+   This often leads to faster convergence compared to sigmoid.
+   We use targets -1 and 1 to match tanh's output range.
+   Classification: >0 is class 1, <=0 is class 0.
+
+4. Generalization:
+   The test accuracy shows how well the network generalizes.
+   Good generalization means the network learned the underlying
+   pattern, not just memorized the training data.
+
+✓ SUCCESS: The network achieved excellent test accuracy!
+  With 100.000000% accuracy on unseen data, the network
+  successfully learned the linear decision boundary.
+
+Demo completed successfully!
