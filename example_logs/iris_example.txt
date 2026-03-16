@@ -50,17 +50,17 @@ Training configuration:
 Training progress (every 100 epochs):
 Epoch | Train Loss | Train Acc | Test Acc
 ------|------------|-----------|----------
-    1 | 0.215947 | 60.83%   | 66.67%
-  100 | 0.019807 | 96.67%   | 100.00%
-  200 | 0.016566 | 96.67%   | 100.00%
-  300 | 0.015657 | 97.50%   | 100.00%
+    1 | 0.217767 | 62.50%   | 70.00%
+  100 | 0.020637 | 95.83%   | 100.00%
+  200 | 0.016947 | 96.67%   | 100.00%
+  300 | 0.016003 | 97.50%   | 100.00%
 
 Step 7: Final evaluation
 ------------------------
 Final performance:
   - Training accuracy: 97.50%
   - Test accuracy: 100.00%
-  - Test loss: 0.000894
+  - Test loss: 0.000973
 
 Step 8: Sample predictions on test set
 ---------------------------------------
@@ -69,52 +69,52 @@ Showing first 10 test predictions:
 Sample 1:
   Actual: Iris-versicolor
   Predicted: Iris-versicolor ✓
-  Probabilities: [0.017, 0.994, 0.001]
+  Probabilities: [0.014, 0.990, 0.003]
 
 Sample 2:
   Actual: Iris-versicolor
   Predicted: Iris-versicolor ✓
-  Probabilities: [0.005, 0.911, 0.055]
+  Probabilities: [0.004, 0.905, 0.058]
 
 Sample 3:
   Actual: Iris-versicolor
   Predicted: Iris-versicolor ✓
-  Probabilities: [0.005, 0.953, 0.029]
+  Probabilities: [0.005, 0.954, 0.033]
 
 Sample 4:
   Actual: Iris-versicolor
   Predicted: Iris-versicolor ✓
-  Probabilities: [0.009, 0.987, 0.005]
+  Probabilities: [0.008, 0.984, 0.008]
 
 Sample 5:
   Actual: Iris-setosa
   Predicted: Iris-setosa ✓
-  Probabilities: [0.996, 0.007, 0.000]
+  Probabilities: [0.994, 0.005, 0.000]
 
 Sample 6:
   Actual: Iris-virginica
   Predicted: Iris-virginica ✓
-  Probabilities: [0.001, 0.041, 0.969]
+  Probabilities: [0.001, 0.038, 0.960]
 
 Sample 7:
   Actual: Iris-virginica
   Predicted: Iris-virginica ✓
-  Probabilities: [0.001, 0.023, 0.986]
+  Probabilities: [0.001, 0.028, 0.974]
 
 Sample 8:
   Actual: Iris-virginica
   Predicted: Iris-virginica ✓
-  Probabilities: [0.001, 0.023, 0.986]
+  Probabilities: [0.001, 0.026, 0.974]
 
 Sample 9:
   Actual: Iris-setosa
   Predicted: Iris-setosa ✓
-  Probabilities: [0.993, 0.013, 0.000]
+  Probabilities: [0.992, 0.010, 0.000]
 
 Sample 10:
   Actual: Iris-setosa
   Predicted: Iris-setosa ✓
-  Probabilities: [0.991, 0.017, 0.000]
+  Probabilities: [0.983, 0.013, 0.000]
 
 Accuracy on shown samples: 10/10 = 100.0%
 
